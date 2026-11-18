@@ -74,8 +74,9 @@
 <script>
 /* ── 解密核心：复现 openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt ── */
 const ENC_URL = 'protected/course-core.tar.enc';
-// Pages 对单个大文件下载极慢（实测 1.8MB 30s 未完成），拆成 200KB 分片并行拉取
-const PARTS = ['aa','ab','ac','ad','ae','af','ag','ah','ai'];
+// 加密包已先 gzip 压缩（1.8MB→580KB）；再拆成 3 个 200KB 分片并行拉取，
+// 进一步规避 Pages 对大文件的限流（实测单片 30s 未完成，200KB 约 2s）。
+const PARTS = ['aa','ab','ac'];
 const PART_URLS = PARTS.map(p => 'protected/parts/core.part.' + p);
 const enc = new TextEncoder();
 const $ = id => document.getElementById(id);
@@ -95,13 +96,16 @@ async function unlock(password){
   msg('正在读取加密包…');
   let buf;
   try{
-    // 优先并行拉取分片（Pages 大文件限流，小片快）
+    // 并行拉取分片，每片完成都更新进度（避免"卡住无反应"的观感）
+    let done = 0;
     const timer = new Promise((_,rej)=>setTimeout(()=>rej(new Error('读取超时')), 25000));
     const chunks = await Promise.race([
       Promise.all(PART_URLS.map(async u => {
         const r = await fetch(u, {cache:'no-store'});
         if(!r.ok) throw new Error('分片 '+u+' HTTP '+r.status);
-        return new Uint8Array(await r.arrayBuffer());
+        const c = new Uint8Array(await r.arrayBuffer());
+        msg('正在读取加密包… ' + (++done) + '/' + PART_URLS.length + ' 片');
+        return c;
       })),
       timer
     ]);
@@ -128,10 +132,20 @@ async function unlock(password){
     const ck = await crypto.subtle.importKey('raw', key, {name:'AES-CBC',length:256}, false, ['decrypt']);
     plain = new Uint8Array(await crypto.subtle.decrypt({name:'AES-CBC',iv}, ck, data));
   }catch(e){ throw new Error('✗ 密码错误，请重新输入'); }
+  // 新格式：明文是 gzip 压缩的 tar（头 2 字节 1f 8b），先解压；旧格式裸 tar 直接用
+  let tarBytes = plain;
+  if(plain[0]===0x1f && plain[1]===0x8b){
+    msg('正在解压…');
+    try{
+      const ds = new DecompressionStream('gzip');
+      const st = new Blob([plain]).stream().pipeThrough(ds);
+      tarBytes = new Uint8Array(await new Response(st).arrayBuffer());
+    }catch(e){ throw new Error('解压失败：'+e.message); }
+  }
   msg('正在解析文件树…');
-  files = parseTar(plain);
+  files = parseTar(tarBytes);
   // AES-CBC 错误密码偶尔能解出合法填充但内容是乱码；用 tar 头特征做二次校验
-  const head = new TextDecoder('utf-8').decode(plain.slice(0,120));
+  const head = new TextDecoder('utf-8').decode(tarBytes.slice(0,120));
   if(!files.length || !/^(02-|03-|04-|05-|09-)/.test(head))
     throw new Error('✗ 密码错误，请重新输入');
   render();

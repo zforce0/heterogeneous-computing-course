@@ -7,12 +7,15 @@
 
 设计:
   * 密码只从环境变量 KIT_PASSWORD 读取，绝不写入仓库；
-  * 4 类核心目录打包成**一个** protected/course-core.tar.enc（AES-256-CBC，
-    PBKDF2 200000 轮 + 随机 salt）——输入一次密码，全部解锁；
+  * 5 类核心目录先 tar + gzip 压缩，再合成**一个** protected/course-core.tar.enc
+    （AES-256-CBC，PBKDF2 200000 轮 + 随机 salt）——输入一次密码，全部解锁。
+    压缩后体积约为原来的 1/3，浏览器/Pages 下载不再长时间卡住；
+    解密端自动识别「是否 gzip」以兼容旧格式包；
   * 原目录只保留明文「目录清单.md」：列出每个文件名与大小，方便预览结构，
     但不含任何文件内容（PPT/手册/测评/教案正文不可见）；
   * 购课学校拿到密码后运行 decrypt，一次还原全部 4 个目录。
 """
+import gzip
 import os
 import shutil
 import subprocess
@@ -34,6 +37,11 @@ def run(cmd):
     if r.returncode:
         sys.exit("命令失败: %s\n%s" % (" ".join(cmd), r.stderr.decode("utf-8", "replace")))
     return r
+
+
+def open_tar(path):
+    """自动识别 gzip 压缩或裸 tar，兼容压缩前后的两种加密包格式。"""
+    return tarfile.open(path, "r:*")
 
 
 def preview_listing(name, src):
@@ -62,20 +70,25 @@ def encrypt():
 
     with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as tf:
         tar_path = Path(tf.name)
+    gz_path = tar_path.with_suffix(".gz")
     with tarfile.open(tar_path, "w") as tar:
         for name in PROTECTED:
             tar.add(ROOT / name, arcname=name)
+    # 先 gzip 压缩（内置模块，无第三方依赖），显著降低下载体积
+    with open(tar_path, "rb") as fin, gzip.open(gz_path, "wb", compresslevel=9) as fout:
+        shutil.copyfileobj(fin, fout)
 
     run(["openssl", "enc", "-aes-256-cbc", "-pbkdf2", "-iter", "200000",
-         "-salt", "-in", str(tar_path), "-out", str(ENC), "-pass", "env:KIT_PASSWORD"])
+         "-salt", "-in", str(gz_path), "-out", str(ENC), "-pass", "env:KIT_PASSWORD"])
     tar_path.unlink()
+    gz_path.unlink()
 
-    # 校验：能解密且 4 目录齐全
+    # 校验：能解密、能解压且各目录齐全
     with tempfile.NamedTemporaryFile(suffix=".tar", delete=False) as tf:
         chk = Path(tf.name)
     run(["openssl", "enc", "-d", "-aes-256-cbc", "-pbkdf2", "-iter", "200000",
          "-in", str(ENC), "-out", str(chk), "-pass", "env:KIT_PASSWORD"])
-    with tarfile.open(chk) as t:
+    with open_tar(chk) as t:  # gzip 或裸 tar 均可识别
         names = t.getnames()
     chk.unlink()
     for name in PROTECTED:
@@ -110,7 +123,7 @@ def decrypt():
     run(["openssl", "enc", "-d", "-aes-256-cbc", "-pbkdf2", "-iter", "200000",
          "-in", str(ENC), "-out", str(tmp), "-pass", "env:KIT_PASSWORD"])
     with tempfile.TemporaryDirectory() as td:
-        with tarfile.open(tmp) as t:
+        with open_tar(tmp) as t:  # 兼容 gzip 压缩的新格式与裸 tar 旧格式
             t.extractall(td, filter="data")
         for name in PROTECTED:
             src = Path(td) / name

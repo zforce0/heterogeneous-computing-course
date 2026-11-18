@@ -22,7 +22,7 @@
     font-size:14px;font-weight:600;cursor:pointer;margin-left:8px}
   button:hover{filter:brightness(1.08)} button:disabled{opacity:.5;cursor:not-allowed}
   button.ghost{background:transparent;color:var(--blue);border:1px solid var(--line)}
-  .msg{margin-top:14px;min-height:22px;color:var(--muted)}
+  .msg{margin-top:14px;min-height:22px;color:var(--muted);white-space:pre-line}
   .msg.err{color:var(--red)} .msg.ok{color:var(--green)}
   .tree{border:1px solid var(--line);border-radius:8px;overflow:hidden}
   .dir{padding:8px 14px;background:#1c2128;font-weight:600;color:var(--accent);border-bottom:1px solid var(--line)}
@@ -96,11 +96,15 @@ async function unlock(password){
   let buf;
   try{
     // 优先并行拉取分片（Pages 大文件限流，小片快）
-    const chunks = await Promise.all(PART_URLS.map(async u => {
-      const r = await fetch(u, {cache:'no-store'});
-      if(!r.ok) throw new Error('分片 '+u+' HTTP '+r.status);
-      return new Uint8Array(await r.arrayBuffer());
-    }));
+    const timer = new Promise((_,rej)=>setTimeout(()=>rej(new Error('读取超时')), 25000));
+    const chunks = await Promise.race([
+      Promise.all(PART_URLS.map(async u => {
+        const r = await fetch(u, {cache:'no-store'});
+        if(!r.ok) throw new Error('分片 '+u+' HTTP '+r.status);
+        return new Uint8Array(await r.arrayBuffer());
+      })),
+      timer
+    ]);
     const total = chunks.reduce((s,c)=>s+c.length,0);
     buf = new Uint8Array(total);
     let off=0; for(const c of chunks){ buf.set(c,off); off+=c.length; }
@@ -111,7 +115,7 @@ async function unlock(password){
       if(!r.ok) throw new Error('HTTP '+r.status);
       buf = new Uint8Array(await r.arrayBuffer());
     }catch(e2){
-      throw new Error('无法读取加密包（分片与单片均失败）。请运行 python3 -m http.server 8000 后本地访问，或用脚本解密。');
+      throw new Error('无法读取加密包（网络超时或失败）。建议：\\n1) 刷新页面重试；\\n2) 运行 python3 -m http.server 8000 后本地访问；\\n3) 用命令行 KIT_PASSWORD=... python3 scripts/protect_core.py decrypt。');
     }
   }
   if(new TextDecoder('latin1').decode(buf.slice(0,8)) !== 'Salted__')

@@ -43,6 +43,7 @@ make run                                # 前台运行，Ctrl-C 结束
 | `docs/05-course-map.md` | **7 讲 lecture + 4 个 lab** 与工程文件/演示命令逐项对照 |
 | `docs/06-reproduce-and-verify.md` | 数据归档、复现实验、校验方法、时间/时钟口径 |
 | `docs/07-troubleshooting.md` | 常见故障：设备离线、USB 热成像、NPU 后端、0.6B 输出、端口冲突 |
+| `docs/08-界面效果说明.md` | 6 张截图逐项对照「每个部分跑对了应长什么样」及跑错迹象 |
 | `ARCHIVE_NOTICE.md`（打包后生成） | 包内有意排除哪些文件、如何取回模型 |
 
 ---
@@ -53,7 +54,7 @@ make run                                # 前台运行，Ctrl-C 结束
 
 **Lab（4 个）**：环境与链路核验（M1）· 双光谱采集（M2）· 异构推理（M3）· 开放命题（M4）
 
-> Lab 名称与课程规划 V6.4 的四教具包一致。逐讲/逐实验的对应关系见 `docs/05-course-map.md`。
+> Lab 名称与课程规划 V6.4 的四教具包一致。逐讲/逐实验的对应关系见 `docs/05-course-map.md`、`docs/08-界面效果说明.md`（截图对照）。
 
 ---
 

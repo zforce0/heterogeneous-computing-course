@@ -37,10 +37,10 @@
 
 ## 🔓 在线解锁入口（推荐）
 
-**[打开解锁页面 `unlock.html`](unlock.html)** — 浏览器内输入密码，即可查看/下载全部核心材料（PPT / 手册 / 测评 / 教案）。密码仅在本地校验与解密，不上传任何服务器。
+**[🔓 在线解锁入口](https://zforce0.github.io/heterogeneous-computing-course/unlock.html)** — 浏览器内输入密码，即可查看/下载全部核心材料（PPT / 教具包 / 手册 / 测评 / 教案）。密码仅在本地校验与解密，不上传任何服务器。
 
-> 本地打开：在仓库根目录运行 `python3 -m http.server 8000`，浏览器访问 `http://localhost:8000/unlock.html`。
-> 命令行等价：`KIT_PASSWORD='<授权密码>' python3 scripts/protect_core.py decrypt`。
+> 在线地址：https://zforce0.github.io/heterogeneous-computing-course/unlock.html
+> 本地等价：在仓库根目录运行 `python3 -m http.server 8000` 后访问 `http://localhost:8000/unlock.html`；或命令行 `KIT_PASSWORD='<授权密码>' python3 scripts/protect_core.py decrypt`。
 
 ---
 

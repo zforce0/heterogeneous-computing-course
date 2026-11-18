@@ -73,6 +73,9 @@
 <script>
 /* ── 解密核心：复现 openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt ── */
 const ENC_URL = 'protected/course-core.tar.enc';
+// Pages 对单个大文件下载极慢（实测 1.8MB 30s 未完成），拆成 200KB 分片并行拉取
+const PARTS = ['aa','ab','ac','ad','ae','af','ag','ah','ai'];
+const PART_URLS = PARTS.map(p => 'protected/parts/core.part.' + p);
 const enc = new TextEncoder();
 const $ = id => document.getElementById(id);
 let files = [];   // {name, bytes:Uint8Array}
@@ -91,12 +94,24 @@ async function unlock(password){
   msg('正在读取加密包…');
   let buf;
   try{
-    // 优先 fetch 同目录文件（本地需 http 服务；file:// 下回退到文件选择）
-    const r = await fetch(ENC_URL);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    buf = new Uint8Array(await r.arrayBuffer());
+    // 优先并行拉取分片（Pages 大文件限流，小片快）
+    const chunks = await Promise.all(PART_URLS.map(async u => {
+      const r = await fetch(u, {cache:'no-store'});
+      if(!r.ok) throw new Error('分片 '+u+' HTTP '+r.status);
+      return new Uint8Array(await r.arrayBuffer());
+    }));
+    const total = chunks.reduce((s,c)=>s+c.length,0);
+    buf = new Uint8Array(total);
+    let off=0; for(const c of chunks){ buf.set(c,off); off+=c.length; }
   }catch(e){
-    throw new Error('无法通过 fetch 读取加密包。请在仓库目录运行 python3 -m http.server 8000 后访问本页，或用脚本解密。');
+    // 回退：单片（本地 http.server 或网络环境良好时可用）
+    try{
+      const r = await fetch(ENC_URL, {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      buf = new Uint8Array(await r.arrayBuffer());
+    }catch(e2){
+      throw new Error('无法读取加密包（分片与单片均失败）。请运行 python3 -m http.server 8000 后本地访问，或用脚本解密。');
+    }
   }
   if(new TextDecoder('latin1').decode(buf.slice(0,8)) !== 'Salted__')
     throw new Error('加密包格式不正确（缺少 Salted__ 头）');

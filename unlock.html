@@ -144,9 +144,10 @@ async function unlock(password){
   }
   msg('正在解析文件树…');
   files = parseTar(tarBytes);
-  // AES-CBC 错误密码偶尔能解出合法填充但内容是乱码；用 tar 头特征做二次校验
-  const head = new TextDecoder('utf-8').decode(tarBytes.slice(0,120));
-  if(!files.length || !/^(02-|03-|04-|05-|09-)/.test(head))
+  // AES-CBC 错误密码偶尔能解出合法填充但内容是乱码；用「解析出的第一个文件名」校验。
+  // 不能用 tar 原始头字节：gzip 包里 tar 开头是 PAX 头 ././@PaxHeader，会误判正确密码。
+  const firstName = files.length ? files[0].name : '';
+  if(!files.length || !/^(02-|03-|04-|05-|09-)/.test(firstName))
     throw new Error('✗ 密码错误，请重新输入');
   render();
 }

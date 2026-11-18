@@ -9,8 +9,8 @@ help:
 	@echo "  make evalkit    运行测评包一键测评"
 	@echo "  make platform   实验平台部署自检（只读）"
 	@echo "  make package    生成脱敏交付包（dist/）"
-	@echo "  make unlock     解锁核心材料（需环境变量 KIT_PASSWORD）"
-	@echo "  make protect    重新加密核心材料（需环境变量 KIT_PASSWORD）"
+	@echo "  make unlock     一次解锁全部核心材料（需 KIT_PASSWORD）"
+	@echo "  make protect    重新加密全部核心材料为单一加密包（需 KIT_PASSWORD）"
 
 check:
 	python3 scripts/check_placeholders.py

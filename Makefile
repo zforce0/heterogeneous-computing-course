@@ -16,6 +16,7 @@ check:
 	python3 scripts/check_placeholders.py
 
 labs:
+	@if [ ! -d 03-教具包/M1_lab_env ]; then echo "[需要解锁] 先运行: KIT_PASSWORD='<密码>' make unlock"; exit 1; fi
 	@for m in 03-教具包/M*; do \
 		echo "=== $$m ==="; \
 		( cd "$$m" && python3 selftest/run_demo.py 2>&1 | tail -3 ) || echo "  [skip] $$m"; \

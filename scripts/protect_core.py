@@ -22,7 +22,9 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PROTECTED = ["02-理论课-PPT", "04-实验手册", "05-测评包", "09-示范课教案"]
+PROTECTED = ["02-理论课-PPT", "03-教具包", "04-实验手册", "05-测评包", "09-示范课教案"]
+# 这些目录在锁定状态下保留明文 README（可预览设计，不含细节）
+KEEP_README = {"03-教具包"}
 OUT = ROOT / "protected"
 ENC = OUT / "course-core.tar.enc"
 
@@ -83,10 +85,14 @@ def encrypt():
     for name in PROTECTED:
         src = ROOT / name
         listing = preview_listing(name, src)
+        keep = (src / "README.md").read_bytes() if name in KEEP_README and (src / "README.md").is_file() else None
         shutil.rmtree(src)
         src.mkdir()
+        if keep is not None:
+            (src / "README.md").write_bytes(keep)
         (src / "目录清单.md").write_text(listing, encoding="utf-8")
-        print("[OK] %-16s -> 明文清单 %d 文件" % (name, listing.count("| `")))
+        print("[OK] %-16s -> 明文清单 %d 文件%s" % (name, listing.count("| `"),
+              " + README" if keep is not None else ""))
     # 删旧的分包（若存在）
     for name in PROTECTED:
         old = OUT / (name + ".tar.enc")

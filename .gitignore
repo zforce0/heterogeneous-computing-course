@@ -1,0 +1,64 @@
+# 课程产品包 · Git 忽略清单
+
+# 本机/系统
+.DS_Store
+Thumbs.db
+*.swp
+~$*
+*.lock
+
+# 私有配置与脱敏占位符的「已填值」副本（只提交模板）
+**/student.yaml
+**/lab.env
+*.env
+!**/lab.env.example
+!**/*.example
+
+# 学生/运行产出（runs 属学生提交，不进产品包基线）
+**/runs/
+output/
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# 打包生成物
+dist/
+*.tar.gz
+*.zip
+
+# 编辑器 / 工作流中间产物
+.slidep/
+.workbuddy/
+stage1/
+stage2/
+stage3/
+
+# 嵌套仓库
+**/.git/
+
+# 编译产物
+build/
+*.o
+*.a
+*.so
+*.dylib
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# 大模型与固件二进制（体积/许可，另行分发，见 06-实验平台/ARCHIVE_NOTICE.md）
+*.rknn
+*.onnx
+*.pt
+*.pth
+*.gguf
+*.bin
+*.data
+
+# 大批量采集图像
+captures/
+*.log

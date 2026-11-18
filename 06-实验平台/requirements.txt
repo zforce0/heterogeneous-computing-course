@@ -1,0 +1,7 @@
+# 核心平台（dashboard、SSE/MJPEG 中继、证据协议、节点探测、编排脚本）
+# 全部使用 Python 3.8+ 标准库，无需 pip 安装任何包。
+#
+#   python3 -m pip install -r requirements.txt     # 实际是空操作，保留文件用于 CI/课程说明
+#
+# 可选 ML/转换工具见 requirements-ml.txt；板端 RKNN/CANN 运行时不属于 pip 包，
+# 其安装方式见 docs/02-deployment.md。

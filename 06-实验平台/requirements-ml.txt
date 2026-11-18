@@ -1,0 +1,11 @@
+# 可选：模型转换/离线验证工具（不是运行 dashboard 的依赖）
+# 实测环境：Mac/x86_64 主机，onnxruntime 1.17.3 + numpy 1.26.4 + protobuf 4.25.3
+# 板端 aarch64 安装见 G3 归档（离线 wheel，pip install --no-index）。
+numpy==1.26.4
+protobuf==4.25.3
+onnxruntime==1.17.3
+onnx>=1.16,<2
+opencv-python>=4.8,<5
+# torch 只在 twocameraOnMAC/models/yolov8n/export_onnx.py 导出 ONNX 时需要；
+# 若不做模型导出，可注释掉以减小体积。
+# torch>=2.0

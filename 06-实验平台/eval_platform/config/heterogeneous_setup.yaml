@@ -1,0 +1,271 @@
+# 互联异构计算实验 · 设置内容 V1.3（架构重配）
+# 取代：V1.2 的角色分工（Mac 跑 LLM -> Mac 仅显示/控制，昇腾盒子 = 中心 LLM）
+# 更新：2026-11-14 13:05 +0800
+# 口径：未验证项一律标 planned / N/A，禁止以 0 或默认值填充（沿用本实验 7.x 测量口径）
+schema_version: heterogeneous-setup-v1.3
+supersedes:
+  - "Benchmark实验设置手册_V1.1（实机版）.docx §1 修订说明 / §2 物理连接 / §3 网络连接"
+  - "eval_platform/dashboard/data.json → platform.nodes / platform.topology"
+updated_local: "2026-11-13 22:54:38 +0800"
+updated_utc: "2026-11-13T14:54:38Z"
+
+# ═══ RV1126B 复测与地址固化（2026-11-16 16:15 实测）═════════════════════
+g4_rv1126b_recovery_20261116_1615:
+  verdict: "硬件完好、可正常使用——此前「离线」是地址问题，不是烧坏"
+  device: "EASY-EAI-NANO-TB / Rockchip RV1126B NANO V10 / 4 核 aarch64 / 1968 MB / kernel 6.1.141"
+  mac: "4e:0e:39:be:41:b3"
+  root_cause: "板端 netplan：eth0(NET0)=dhcp4:true，静态 .22 原配在 eth1(NET1)。本轮网线插在 NET0，而实验网段无 DHCP 服务器 → 板子拿不到地址、二层零流量，故 ARP 与全网段扫描均不可见。旁证：camera-preview.service 因绑定 192.168.77.22 失败，累计重启 65840 次"
+  diagnosis_method: "在 RK3588 上临时起 dnsmasq 当 DHCP 服务器，板子续租时的 DHCPDISCOVER 立即暴露主机名与 MAC（无 IP 的设备只有 DHCP 能召唤出来）"
+  fix: "eth0 改为静态 192.168.77.22/24（dhcp4:false），eth1 去掉重复的静态地址；netplan 原文件备份为 *.bak.20261116；重启验证通过（重启后 uptime 0 min 即带静态地址，SSH 免密可用）"
+  dhcp_fallback: "RK3588 systemd 服务 g4-dhcp.service（/etc/g4-dhcp.conf：仅 eth1、port=0 不做 DNS、RV MAC→.22 infinite、其它设备 .150-.170），已 enable --now；板子若被重刷回 DHCP 也能自动拿回原地址"
+  ssh: "root 免密（ed25519 公钥已装；板厂默认密码见私有记录，不落盘）"
+  services: "8082 camera_stream.py 在线：可见光 10 fps、YOLO 检出正常（mouse 0.784 / chair 0.783）；22 SSH 免密"
+  thermal_ir: "NOT READY — 厂商 SDK /root/eval_dashboard/ir_snap 报 'IR camera 0bda:5840 was not found'，lsusb 无 0bda:5840；属物理连接问题，需检查热成像模组 USB 线"
+  measured: "ping .22 RTT 1.28 ms；重启前后均在线；四节点 dashboard api/status 全 up"
+  open_item: "热成像模组重新插好 USB 后，重跑 ./ir_snap 与 /status.json 复验 ir_ready"
+
+# ═══ V1.3 架构重配（2026-11-14 13:05 实测）═══════════════════════════
+# 用户要求：Mac 只做显示/控制；LLM 上移到昇腾盒子；RK3588 与 RV1126B 承担端侧视觉。
+g4_architecture_20261114_1305:
+  mac_role: "display/control ONLY — 不再承担任何 LLM 推理；Ollama 保留但退役，不作为实验节点"
+  llm_node: "ascend-box (192.168.77.10:8080)"
+  llm_runtime: "llama.cpp b12375 盒上源码编译（Ubuntu 22.04 / glibc 2.35 / ARM NEON CPU 后端）"
+  llm_model: "qwen3:0.6b Q4 GGUF 499MB（Mac Ollama blob 离线搬运至 /opt/g4-llm/models/）"
+  llm_service: "systemd g4-llm.service, active, /health=200, OpenAI 兼容 /v1/chat/completions"
+  llm_bench: "3/3 用例成功，decode 中位 4.04 tok/s（eval_platform/llm/llm_bench_ascend.json）"
+  npu_backend: "CANN 版编译成功且 --list-devices 识别 CANN0: Ascend310B1；但 CANN 8.0.RC3 在 310B1 缺 RmsNorm 算子，运行时 abort → 生产服务用 CPU 后端。完整4轮绕过记录见 npu_attempt.md"
+  rk3588: "已用起来：9100 G3 证据服务 + 8081 板上 dashboard（platform 段已更新为 V1.3 星型）；推送 resnet50.rknn 与 events_ai.jsonl；rk_llm_reconfirm.py 实跑 3/3 成功，跨板调用昇腾 LLM"
+  rv1126b: "NOT ONLINE — 192.168.77.22 100% 丢包、端口全 closed、跨网段(137/0/1)亦无应答、RK 侧邻居表无其 MAC。端侧视觉脚本已就绪，上电后一条 run_g4_pipeline.sh rv 即可"
+  keyframes: "4 组带时间戳关键帧由昇腾 LLM 重新语义确认（keyframes_ascend.json），图像为 2026-10-12 归档实跑"
+  dashboard: "eval_platform/dashboard/g4_live.html + serve_g4.py (127.0.0.1:8899)，/api/status 实时探测 + /api/llm 代理"
+  online_hosts: ["192.168.77.1", "192.168.77.10", "192.168.77.21", "192.168.77.23"]
+  honest_note: "0.6B 小模型语义判断能力有限（KF-03/KF-04 误判 confirm），不作测量口径；NPU 未启用；RV1126B 未上电。三者均如实标注，不伪造"
+
+# 链路状态有时间维度，按时间戳分段保留，禁止把任一历史值当作"当前"。
+# 11:56 昇腾盒子上电并实测规格，全部流程已打通（除 RV1126B 仍未上电）。
+current_link_state_20261114_1156:
+  topology: "星型：Mac .1 / RK3588 .21 / RV1126B .22 / 昇腾 .10 同挂交换机，192.168.77.0/24"
+  online_hosts: ["192.168.77.1", "192.168.77.10", "192.168.77.21", "192.168.77.23"]
+  ascend_box: "ONLINE — QiZhi01-20T / Atlas 200I A2 / 310B1 / 20 TOPS INT8 / 10 TFLOPS FP16 / 24 GB / CANN 8.0.RC3"
+  ascend_default_addr: "eth1 192.168.137.100/24（出厂静态，网关 192.168.137.1）；本轮临时加 192.168.77.10/24（ip addr add，重启失效）"
+  ascend_ssh: "免密已装（root, id_ed25519_g4_ascend）；默认口令由用户提供，仅用于首次装公钥，未写入项目文件"
+  ascend_llm_runtime: absent          # 无 MindIE/torch_npu/transformers/llama.cpp/ollama，Python 3.10 无 pip，无外网
+  ascend_board_clock: "2025-08-15（实际 2026-11-14，落后约 15 个月）→ 板端 RTC 不可信"
+  rv1126b: "WAIT — 仍不在线（100% 丢包），待上电/接线；proxy ARP 已解除，上电后应直连"
+  rk3588: "ONLINE — 免密 + sudo -n，proxy_arp=0 / forward=0 / rk-forward.service inactive（修复持续生效）"
+  llm_verdict_revised: "两层：原始 AI 算力/容量 → 昇腾盒子第一；LLM 实际可运行性与实测吞吐 → M1 仍唯一且最强（9.34 tok/s）。不迁移中心 LLM"
+  spec_report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/ascend_box_spec_report.md"
+
+# 01:29 已完成 SSH 免密与 proxy ARP 修复，只剩 RV/昇腾上电。
+current_link_state_20261114_0129:
+  topology: "星型：Mac .1 / RK3588 .21 / RV1126B .22 / 昇腾盒子 .10 同挂交换机，192.168.77.0/24"
+  en5: "1000baseT active, Manual 192.168.77.1/24, 直连路由就绪"
+  ssh: "已补齐：~/.ssh/config 别名 rk3588(cat@.21) / rv1126b(root@.22) / ascend(root@.10)，3 把无口令 ed25519 专用密钥"
+  rk3588: "ONLINE — 免密 + sudo -n 验证通过（lubancat, Debian 11, 5.10.160 aarch64）；8081 dashboard / 9100 证据协议可用"
+  rk3588_proxy_arp_fixed: true
+  rk3588_state_after_fix: "eth0/eth1 proxy_arp=0, ip_forward=0, rk-forward.service inactive+disabled, .22 主机路由已删；01:28 复核仍生效"
+  mac_arp_cleared: "用 networksetup -setdhcp 再 -setmanual 清掉 .22 陈旧 ARP（sudo arp -d 权限不足）"
+  rv1126b: "WAIT — 不在线（RK 侧 ip neigh 显示 .22 FAILED，全段扫描只有 .1/.21/.23）；待上电/接线；proxy ARP 劫持已解除，上电后应直连"
+  ascend_box: "WAIT — 不在线（100% 丢包、ARP incomplete、8 个常见端口 closed）；型号/算力/OS 仍 N/A"
+  online_hosts: ["192.168.77.1", "192.168.77.21", "192.168.77.23"]
+  finalize_tool: "eval_platform/tools/finalize_lab_setup.sh（设备上电后一键收尾：复核修复、装公钥、跑 probe_ascend_box.sh、全量复检）"
+  report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/network_topology_snapshot.md §11"
+
+# 23:56 交换机上电、RK3588 上线；00:00 用户把 RV1126B 从直连 RK 改接交换机（链式 -> 星型）。
+current_link_state_20261114_0000:
+  topology: "星型：Mac .1 / RK3588 .21 / RV1126B .22 / 昇腾盒子 .10 全部挂交换机，同一 192.168.77.0/24"
+  topology_source: "用户 00:00 口述（此前 V1.1 为链式 Mac->RK->RV，RK 做三层转发 + proxy ARP）"
+  en5_status: "1000baseT <full-duplex> / active；Manual 192.168.77.1/24，直连路由就绪"
+  rk3588: "ONLINE — ping .21 RTT 0.82ms / .23 RTT 1.05ms；SSH OpenSSH_8.4p1 Debian-5+deb11u6；8081 dashboard HTTP 200；9100 G3 证据协议 ping/pong 握手成功"
+  rk3588_dashboard_stale: "板端 data.json 仍是 2026-11-06 快照（写 MacBook Air M2、旧链式拓扑），未同步 V1.2"
+  rv1126b: "UNREACHABLE — 100% 丢包、所有端口 closed；ARP 被 RK 代答"
+  rv1126b_root_cause: "链式残留 proxy ARP：.21/.22/.23 三个 IP 全解析到 RK eth1 MAC 46:0c:f8:68:d1:b9，帧被劫持到 RK"
+  ascend_box: "UNREACHABLE — .10 100% 丢包、无 ARP、常见端口 closed；型号/算力/OS 仍 N/A"
+  ssh_access: "免密未配（~/.ssh 只有 known_hosts，无密钥与 config）；cat@.21 / root@.21 均 Permission denied"
+  proxy_arp_fix_tool: "eval_platform/tools/disable_rk_proxy_arp.sh（在 RK3588 上 root 执行，仅适用星型拓扑）"
+  mac_side_arp_clear: "sudo arp -d 192.168.77.22（Mac 侧清缓存，无管理员权限时不可用）"
+  report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/network_topology_snapshot.md §10"
+
+# 23:39 交换机短暂上联办公室外网 -> 23:45 设备掉电 -> 23:50 又脱离办公室网。
+current_link_state_20261113_2350:
+  topology: "交换机已脱离办公室外网，恢复为独立实验网；Mac en5 -> 交换机 -> 三台板子"
+  en5_status: "inactive / media: none（物理层无载波；23:22 曾为 1000baseT active）"
+  en5_config_persisted: "Manual 192.168.77.1/24（networksetup -getinfo 仍在，链路 down 时 ifconfig 不显示 inet）"
+  en5_counters_frozen: "Ipkts 3174 / Ibytes 210585 / Opkts 820 / Ierrs 0（约 30s 内多次采样无增长）"
+  lab_nodes_reachable: []              # .1/.10/.21/.22 全 no-reply
+  office_uplink: disconnected           # 用户 23:50 口述
+  office_scan_2339: "上联期间 192.168.1.0/24 有 10 台主机，均为网关/打印机/普通 Ubuntu 主机，无实验设备；9100 是打印机 RAW 端口而非 G3 证据协议"
+  software_reset_tried: "networksetup -setmanual 重跑无效；服务 Enabled -> 判定为供电/网线问题"
+  wifi_side: "en0 192.168.1.204/24 -> 网关 192.168.1.1，pypi 200，正常"
+  root_cause_assessment: "实验网物理层供电/接线不稳定，非 IP 规划或脚本问题"
+  tools: "eval_platform/tools/recheck_lab_link.sh + eval_platform/tools/discover_lab_devices.py"
+  report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/network_topology_snapshot.md §9"
+
+current_link_state_20261113_2328:
+  en5_status: "1000baseT <full-duplex> / status: active（交换机恢复上电后）"
+  en5_address: "192.168.77.1/24 手动静态，Router=(null)、无 DNS"
+  en5_config_command: "networksetup -setmanual \"AX88179B\" 192.168.77.1 255.255.255.0"
+  en5_rollback: "sudo networksetup -setdhcp \"AX88179B\""
+  lab_route: "192.168.77 → link#23 en5 直连路由已建立"
+  default_route: "192.168.1.1 via en0（Wi-Fi，上网不受影响，实测 pypi 200 / Ollama 200）"
+  dhcp_server: absent                    # ipconfig getpacket en5 始终 not found
+  peer_frames: "入向帧持续增长（约 1 包/s、60 B/包，Ierrs=0），疑为交换机 STP/LLDP/keepalive"
+  nodes_reachable: []                    # .10 / .21 / .22 全部 ping 不通、ARP incomplete、:22 closed
+  ascend_box: "型号 / 算力 / OS 仍 N/A；无 mDNS、无 DHCP、无 ARP 应答"
+  switch_topology: "用户口述为 Mac en5 → 交换机 → 昇腾盒子 / RK3588 / RV1126B；未实测验证（无抓包权限）"
+  recheck_tool: "eval_platform/tools/recheck_lab_link.sh"
+  report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/network_topology_snapshot.md §8"
+
+link_state_history_2316_down:
+  en5_status: "inactive / media: none（23:11 前为 1000baseT active）"
+  en5_addresses: null                    # 169.254.106.247/16 与 fe80::1406…%en5 均已消失
+  peer_frames: "计数器冻结：Ipkts 1685（2s 间隔两次采样无增长）"
+  cause: "用户反馈交换机断电掉线；23:22 重新上电后恢复"
+
+# ── 本轮在主机上实测确认，非推测 ──────────────────────────────────────────
+verified_on_host_20261113:
+  host_model: "MacBook Air (MacBookAir10,1)"
+  host_chip: "Apple M1, 8 核 (4P+4E)"
+  host_memory: "16 GB 统一内存"
+  host_memory_bandwidth_GBs: 68.25            # M1 公版规格，非本机实测
+  host_llm_runtime: "Ollama 0.34.4 / Metal (llama.cpp backend)"
+  ethernet_adapter: "AX88179B USB 千兆网卡"
+  ethernet_iface: "en5"                       # V1.1 记为 en9，换机后接口重编号
+  ethernet_mac: "6c:1f:f7:24:72:33"
+  ethernet_link: "1000baseT full-duplex, status=active"
+  ethernet_addr_current: "192.168.77.1/24 手动静态（23:22 起；此前为 169.254.106.247/16 link-local）"
+  ethernet_static_192_168_77_1: true          # 已按目标地址规划配置完成
+  wifi_iface: "en0"
+  wifi_addr: "192.168.1.204/24, default route 192.168.1.1（上网，不参与实验网）"
+  legacy_lab_route_192_168_77_0_24: "present: 192.168.77 → link#23 en5（23:22 起）"
+  legacy_ssh_aliases_rk3588_rv1126b: absent   # ~/.ssh/config 为空，别名不存在
+  legacy_nodes_ping: "23:22 复测：192.168.77.10/.21/.22 全部无应答、ARP incomplete、:22 closed（主机侧已就绪，设备未上线）"
+  ascend_box_link: "物理链路 up (1000baseT)；无 DHCP、无可达 IP、无 SSH、无 mDNS _ssh._tcp"
+  ascend_box_model: null                      # 型号未知，必须向用户核验
+  ascend_box_probe_20261113: "链路 up + 入向帧约 1 pkt/s（4s 内 Ipkts +4 / Ibytes +240，Ierrs=0）；无 DHCP 租约、无 ARP/ND 邻居、无 mDNS/SSH、无 USB 串口；芯片级信息仍 N/A"
+  ascend_box_probe_report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/ascend_box_probe.md"
+  ascend_box_probe_tool: "eval_platform/tools/probe_ascend_box.sh（SSH 通后在盒子本机执行，自动采集型号/内存/CANN 并判定 LLM 结论是否翻转）"
+
+# ── 节点清单 ─────────────────────────────────────────────────────────────
+nodes:
+  - id: mac-m1
+    name: "MacBook Air M1"
+    role: "中心 LLM 推理 + 控制 / 归档 / 可视化"
+    status: verified
+    ai_compute: "8 核 GPU ~2.6 TFLOPS FP32；11 TOPS Neural Engine"
+    memory: "16 GB 统一内存（约 11.5 GB 可供模型）"
+    memory_bandwidth_GBs: 68.25
+    software_stack: "Ollama 0.34.4 / Metal / llama.cpp；可选 MLX、MLX-LM"
+    deployed_model: "hetero-edge-llm:v1 (qwen3:latest 8.2B Q4_K_M, 5.23 GB)"
+    endpoint_local: "http://127.0.0.1:11434"
+    endpoint_ethernet: "http://169.254.106.247:11435 (已实测 HTTP 200)"
+    measured_decode_tok_per_s: "9.30 / 9.34 / 9.53 (median 9.34)"
+    measured_at: "2026-11-13 22:55 +0800"
+
+  - id: ascend-box
+    name: "昇腾计算盒子 QiZhi01-20T（Atlas 200I A2 / 310B1）"
+    role: "端侧视觉加速（20 TOPS INT8，已预置 .om 视觉样例）；LLM 为潜在升级节点"
+    status: verified_online_20261114
+    link: "eth1 挂交换机；出厂静态 192.168.137.100/24，本轮临时加 192.168.77.10/24（重启失效）"
+    measured_spec: "20 TOPS INT8 / 10 TFLOPS FP16（官方 20 TOPS 版规格）；1× DaVinciV300 @1.224GHz；4× TAISHANV200M @1.6GHz"
+    memory: "23,673 MB ≈ 23.1 GiB（npu-smi -t memory 实测）；系统 MemTotal 24,241,808 kB"
+    memory_bandwidth_GBs: 51.2            # 推断：96bit LPDDR4X 4266Mbps 官方 20TOPS 版；本机未实测
+    storage: "117 G，可用 91 G"
+    software_stack: "CANN 8.0.RC3 (7.5.0.1.129) / ATC / ACL / mxVision 6.0.0.SPC1；Ubuntu 22.04 LTS，内核 5.10.0+；Python 3.10.12 无 pip"
+    llm_runtime: absent                   # 无 MindIE / torch_npu / transformers / llama.cpp / ollama；无外网
+    vision_model: "预置 .om：garbage_yuv / ctpn / svtr；samples：YOLOv5 / OCR / ResNet / HDR / CartoonGAN / model-adapter(seg,det,cls,keypoint)"
+    reachable: true
+    ssh: "root@192.168.77.10 免密（id_ed25519_g4_ascend）"
+    board_clock_drift: "显示 2025-08-15，实际 2026-11-14，落后约 15 个月"
+    spec_report: "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/ascend_box_spec_report.md"
+    note: "原假设 8 TOPS/4 GB 已被实测推翻；但非 310P/910B 级、无 HBM、无 MindIE，不满足原 flip_condition。判定见 llm_ranking.two_layer_verdict"
+
+  - id: rk3588
+    name: "RK3588 LubanCat-5IO"
+    role: "端侧视觉 / 边缘复核"
+    status: historical_unreachable
+    ip_historical: "192.168.77.21"
+    ai_compute: "6 TOPS INT8 NPU"
+    memory: "7.73 GiB（E00 实测）"
+    software_stack: "librknnrt 1.5.0 / RKNN；resnet50.rknn (FP16, 52 MB) 已归档"
+    vision_model: "ResNet-50 RKNN (NPU 32.6 ms 中位) / YOLO RKNN / G3 规则二次确认"
+    llm_capability: "RKLLM：Qwen2-0.5B 41.6 tok/s；7B W4A16 约 2.8–3.5 tok/s"
+    reachable: false
+
+  - id: rv1126b
+    name: "RV1126B EASY-EAI-Nano-TB v1.02"
+    role: "双光采集 + 轻量视觉推理"
+    status: historical_unreachable
+    ip_historical: "192.168.77.22"
+    ai_compute: "2–3 TOPS INT8 NPU"
+    memory: "1.9 GiB（E00 实测）"
+    software_stack: "librknnrt 2025-08 / RKNN"
+    vision_model: "YOLOv8n (RKNN) 76–82 ms/帧；dual_demo 双光差分显著 + YOLO 级联"
+    llm_capability: "RKLLM 仅 ≤0.5B（MiniCPM4-0.5B 23.24 tok/s）"
+    reachable: false
+
+# ── 网络拓扑 ─────────────────────────────────────────────────────────────
+topology:
+  current_verified: "00:00 星型：Mac .1 / RK3588 .21 / RV1126B .22 / 昇腾盒子 .10 全挂交换机（192.168.77.0/24）；RK3588 在线且服务可用，RV/昇腾不可达（RV 受链式残留 proxy ARP 劫持）"
+  legacy_chain_v11: "旧链式 Mac .1 --eth1--> RK .21 --eth0 .23/32--> RV .22（RK 三层转发 + proxy ARP），00:00 起已被星型取代，但 RK 上转发配置尚未关闭"
+  office_uplink_excursion: "23:39 短暂上联办公室外网（192.168.1.0/24），23:50 断开；上联期间未发现任何实验设备"
+  legacy_v11: "Mac .1 --eth1--> RK3588 .21 --eth0--> RV1126B .22（三层转发 + proxy ARP）"
+  target_planned: |
+    192.168.77.0/24 单网段：
+      Mac en5        .1   ── ethernet ── 昇腾盒子 eth0 .10
+      RK3588 eth1    .21  ── 链式 ────── RV1126B eth1 .22
+    RK3588 仍做 .21/.22 间三层转发 + proxy ARP；所有实验网口不填网关与 DNS。
+  address_plan:
+    mac_en5:    {addr: "192.168.77.1/24",  state: configured_verified_20261113_2322}
+    ascend_eth0: {addr: "192.168.77.10/24", state: planned}
+    rk_eth1:    {addr: "192.168.77.21/24", state: historical}
+    rk_eth0:    {addr: "192.168.77.23/32", state: historical}
+    rv_eth1:    {addr: "192.168.77.22/24", state: historical}
+  gateway: null
+  dns: null
+
+# ── LLM 算力判定 ─────────────────────────────────────────────────────────
+llm_ranking:
+  decisive_metric: "自回归 decode 为内存带宽约束；且必须区分「原始 AI 算力」与「实际可运行 LLM 的吞吐」"
+  winner: mac-m1                          # 实际可运行且实测吞吐维度
+  winner_raw_ai_compute: ascend-box       # 原始 AI 算力/内存容量维度（2026-11-14 修订）
+  order: [mac-m1, ascend-box, rk3588, rv1126b]
+  two_layer_verdict:
+    layer1_raw_compute: "昇腾盒子第一：20 TOPS INT8 / 10 TFLOPS FP16 / 24 GB > M1（ANE 11 TOPS / ≈2.6 TFLOPS FP32 / 16 GB）> RK3588 6 TOPS / 7.73 GiB > RV1126B 2–3 TOPS / 1.9 GiB"
+    layer2_practical_llm: "M1 仍是唯一且最强：68.25 GB/s > 盒子 ~51.2 GB/s(推断)；盒子无任何 LLM 运行时、无 pip、无外网，LLM 实测吞吐 N/A；M1 已部署 hetero-edge-llm:v1 实测 9.34 tok/s"
+    decision: "不迁移中心 LLM；保持「M1 跑 LLM + 昇腾/RK/RV 跑端侧视觉」分工"
+    invalidated_assumption: "11-13 的「8 TOPS INT8 / 4 GB / 25.6 GB/s」假设已被实测推翻，但结论未翻转，理由见 layer2"
+  evidence:
+    mac-m1: "16 GB 统一内存 + 68.25 GB/s + Metal/llama.cpp；本机 8.2B Q4 实测 9.30/9.34/9.53 tok/s（中位 9.34）；公版 7B Q4_0 约 14 tok/s"
+    ascend-box: "实测 310B1 / 20 TOPS INT8 / 10 TFLOPS FP16 / 23,673 MB ≈ 24 GB；带宽 ~51.2 GB/s 为 96bit LPDDR4X 规格推断；CANN 8.0.RC3 但无 MindIE/torch_npu/transformers/llama.cpp/ollama，Python 无 pip、无外网 → 当前无法启动 LLM"
+    rk3588: "7.73 GiB；RKLLM 7B W4A16 约 2.8–3.5 tok/s，0.5B 才流畅"
+    rv1126b: "1.9 GiB，仅 ≤0.5B 模型"
+  flip_condition: "原条件（300I Duo 310P/140 TOPS/48 GB 或 910B 级 ≥32 GB HBM + MindIE）判定：本机 310B1、无 HBM、无 MindIE → 不满足"
+  new_flip_path: "需在盒子离线安装 MindIE 或 llama.cpp-CANN + ATC 转 INT8 模型 + 实测同模型 decode tok/s；若超过 M1 的 9.34 tok/s 再考虑迁移。盒子无外网，须由 Mac 下载 aarch64/CANN 8.0.RC3 匹配包后 scp"
+
+# ── 任务分工（本轮核心变更）─────────────────────────────────────────────
+task_allocation:
+  center_llm:
+    node: mac-m1
+    model: hetero-edge-llm:v1
+    job: "对端侧检测事件做语义二次确认，取代 G3 阶段 RK3588 规则版 verdict"
+  edge_vision:
+    - {node: rv1126b, model: "YOLOv8n RKNN 双光级联", output: "events.jsonl + det_*_vis/_ir.jpg 关键帧"}
+    - {node: rk3588,  model: "ResNet-50 RKNN / ROI 复核", output: "verdict / 复核结果"}
+    - {node: ascend-box, model: "YOLOv8 OM INT8 (planned)", output: "N/A（未部署）"}
+  protocol: "沿用 G3 长度前缀 TCP 证据协议（4B 大端 + UTF-8 JSON，run_id/event_id 幂等，单调钟 + RTT 建期限）"
+
+# ── 待核验清单 ───────────────────────────────────────────────────────────
+open_checks:
+  - "已完成：昇腾盒子型号/内存/CANN 已实测（QiZhi01-20T / 310B1 / 20 TOPS / 24 GB / CANN 8.0.RC3），LLM 判定已按两层结论修订，见 ascend_box_spec_report.md"
+  - "昇腾盒子 192.168.77.10 是 `ip addr add` 临时地址，重启会丢：需写入 netplan/NetworkManager 固化，或改用默认 192.168.137.100 + RK 跳板"
+  - "若要让昇腾承担 LLM：Mac 离线下载 MindIE / llama.cpp-CANN aarch64 + CANN 8.0.RC3 匹配包 → scp → 离线装 pip → ATC 转 INT8 模型 → 实测 tok/s 与 M1 9.34 对比后再定迁移"
+  - "RV1126B 仍待上电/接线（11:56 复测 100% 丢包）"
+  - "已完成后移除：en5 静态 192.168.77.1/24 于 23:22 配好并验证直连路由（本条已完成，保留作记录）"
+  - "交换机恢复供电后，确认昇腾盒子 / RK3588 / RV1126B 是否上电并把网线插到交换机；跑 recheck_lab_link.sh 复检"
+  - "给昇腾盒子配 192.168.77.10/24 并开通 SSH，补齐 ~/.ssh/config 别名"
+  - "接回 RK3588 ⇄ RV1126B 链式链路，恢复 rk-forward.service / proxy ARP"
+  - "已完成（2026-11-18 15:00）：RV1126B 改为挂在 RK3588 eth0 下。内核/NM 均拒绝桥接两块 GMAC 口（NM 报 master waiting for slaves + slave 激活失败；手工 ip 建桥后两端不通），改用三层中继：RK3588 eth0=192.168.77.23/32 + `192.168.77.22/32 dev eth0` 主机路由 + eth0/eth1 proxy_arp=1 + rp_filter=0 + ip_forward=1；Mac 与 RV1126B 配置零改动，RV 仍 192.168.77.22/24（RTT 1.26 ms，视频流 8081/8082 正常）。持久化：NM 连接 g4-rv-eth0 + /etc/sysctl.d/99-g4-relay.conf"
+  - "待办：热成像模组 0bda:5840 仍不在 RV1126B 的 USB 总线上（本轮 lsusb 只有 RTL8153 + webcam + 2×Genesys Hub，dmesg 无插入事件）→ 物理未接通，需检查模组线/换 USB 口"
+  - "现场重跑三端视觉模型，把关键帧时间线从 archived 升级为本轮 fresh"
+  - "校准三端 RTC（RK 曾偏差约 7 个月、RV 约 24 天）"

@@ -1,0 +1,716 @@
+{
+ "schema": "g4-topology-v1",
+ "generated_at": "2026-11-18 15:04:19 +0800",
+ "generated_ts": 1794985459.0141609,
+ "subnet": "192.168.77.0/24",
+ "shape": "star+relay",
+ "shape_evidence": [
+  "检测到 1 条三层中继链路：rv1126b 挂在 rk3588.eth0 下 → 同一个 /24 被人为拆成两段广播域，不是单一 L2 星型",
+  "4 台设备在 192.168.77.0/24 上各有一块载波实验口，但其中 rv1126b 的同网段可达性是靠三层中继实现的 → 不据此判定为单一共享 L2",
+  "多载波设备：rk3588 同时 eth0,eth1 有载波"
+ ],
+ "switches": [
+  {
+   "id": "sw",
+   "label": "L2 交换机（不可管理）",
+   "subnet": "192.168.77.0/24",
+   "speed_mbps": 1000,
+   "note": "无 SSH / SNMP / LLDP，无法读取端口映射；形状为推断值",
+   "manageable": false
+  }
+ ],
+ "nodes": [
+  {
+   "id": "mac",
+   "label": "MacBook Air M1",
+   "kind": "control",
+   "ip": "192.168.77.1",
+   "role": "显示 / 控制（无推理）",
+   "online": true,
+   "hostname": "macbook-air-m1",
+   "interfaces": [
+    {
+     "name": "en1",
+     "mac": "36:8a:0d:b0:3d:00",
+     "ipv4": [],
+     "ipv4_raw": [],
+     "state": "UP",
+     "carrier": false,
+     "speed_mbps": null,
+     "mtu": null,
+     "driver": null,
+     "bus": null,
+     "media": "Thunderbolt 扩展网卡",
+     "media_basis": "networksetup 硬件端口=「Thunderbolt 1」, media=autoselect <full-duplex>",
+     "kind": "ethernet",
+     "virtual": false,
+     "link_status": "inactive",
+     "hardware_port": "Thunderbolt 1"
+    },
+    {
+     "name": "en2",
+     "mac": "36:8a:0d:b0:3d:04",
+     "ipv4": [],
+     "ipv4_raw": [],
+     "state": "UP",
+     "carrier": false,
+     "speed_mbps": null,
+     "mtu": null,
+     "driver": null,
+     "bus": null,
+     "media": "Thunderbolt 扩展网卡",
+     "media_basis": "networksetup 硬件端口=「Thunderbolt 2」, media=autoselect <full-duplex>",
+     "kind": "ethernet",
+     "virtual": false,
+     "link_status": "inactive",
+     "hardware_port": "Thunderbolt 2"
+    },
+    {
+     "name": "en0",
+     "mac": "d2:47:02:dc:4b:6f",
+     "ipv4": [
+      "192.168.1.204"
+     ],
+     "ipv4_raw": [
+      "192.168.1.204"
+     ],
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": null,
+     "mtu": null,
+     "driver": null,
+     "bus": null,
+     "media": "Wi-Fi",
+     "media_basis": "networksetup 硬件端口=「Wi-Fi」, media=autoselect",
+     "kind": "wifi",
+     "virtual": false,
+     "link_status": "active",
+     "hardware_port": "Wi-Fi"
+    },
+    {
+     "name": "en5",
+     "mac": "6c:1f:f7:24:72:33",
+     "ipv4": [
+      "192.168.77.1"
+     ],
+     "ipv4_raw": [
+      "192.168.77.1"
+     ],
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "mtu": null,
+     "driver": null,
+     "bus": null,
+     "media": "USB 转以太网",
+     "media_basis": "networksetup 硬件端口=「AX88179B」, media=autoselect (1000baseT <full-duplex>)",
+     "kind": "ethernet",
+     "virtual": false,
+     "link_status": "active",
+     "hardware_port": "AX88179B"
+    }
+   ],
+   "neigh": [
+    {
+     "ip": "169.254.221.189",
+     "mac": "f4:96:34:f5:43:e4",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.1",
+     "mac": "5c:b0:a:42:a2:d6",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.31",
+     "mac": "2a:7:ee:83:71:4f",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.52",
+     "mac": "6c:b:5e:b1:c6:d8",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.188",
+     "mac": "c6:8b:16:b1:bf:29",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.193",
+     "mac": "9e:42:ca:8d:1f:7d",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.204",
+     "mac": "d2:47:2:dc:4b:6f",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.240",
+     "mac": "ae:ba:a3:da:54:a4",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.1.255",
+     "mac": "ff:ff:ff:ff:ff:ff",
+     "dev": "en0",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.1",
+     "mac": "6c:1f:f7:24:72:33",
+     "dev": "en5",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.10",
+     "mac": "7a:12:10:7f:f9:be",
+     "dev": "en5",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.21",
+     "mac": "fe:4:f3:af:68:6e",
+     "dev": "en5",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.22",
+     "mac": "fe:4:f3:af:68:6e",
+     "dev": "en5",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "224.0.0.251",
+     "mac": "1:0:5e:0:0:fb",
+     "dev": "en0",
+     "state": "REACHABLE"
+    }
+   ],
+   "routes": [
+    "default            192.168.1.1        UGScg                 en0",
+    "192.168.77         link#23            UCS                   en5      !",
+    "192.168.77.1/32    link#23            UCS                   en5      !",
+    "192.168.77.1       6c:1f:f7:24:72:33  UHLWI                 lo0",
+    "192.168.77.10      7a:12:10:7f:f9:be  UHLWIi                en5    814",
+    "192.168.77.11      link#23            UHLWI                 en5      !",
+    "192.168.77.21      fe:4:f3:af:68:6e   UHLWIi                en5    785",
+    "192.168.77.22      fe:4:f3:af:68:6e   UHLWIi                en5   1163",
+    "default                                 fe80::1%en0                             UGcg                  en0",
+    "default                                 fe80::%utun0                            UGcIg               utun0",
+    "default                                 fe80::%utun1                            UGcIg               utun1",
+    "default                                 fe80::%utun2                            UGcIg               utun2",
+    "default                                 fe80::%utun3                            UGcIg               utun3",
+    "default                                 fe80::%utun4                            UGcIg               utun4",
+    "default                                 fe80::%utun5                            UGcIg               utun5",
+    "default                                 fe80::%utun6                            UGcIg               utun6",
+    "default                                 fe80::%utun7                            UGcIg               utun7"
+   ],
+   "forwarding": {
+    "ip_forward": 0,
+    "bridges": [],
+    "proxy_arp": {}
+   },
+   "raw_ok": true,
+   "lab_interface": "en5",
+   "lab_media": "USB 转以太网",
+   "lab_speed_mbps": 1000,
+   "lab_mac": "6c:1f:f7:24:72:33",
+   "uplink": {
+    "type": "switch"
+   },
+   "idle_ports": [
+    {
+     "name": "en1",
+     "media": "Thunderbolt 扩展网卡",
+     "state": "UP",
+     "carrier": false,
+     "speed_mbps": null,
+     "relay_port": false,
+     "note": "未插线"
+    },
+    {
+     "name": "en2",
+     "media": "Thunderbolt 扩展网卡",
+     "state": "UP",
+     "carrier": false,
+     "speed_mbps": null,
+     "relay_port": false,
+     "note": "未插线"
+    }
+   ]
+  },
+  {
+   "id": "ascend",
+   "label": "昇腾 QiZhi01-20T",
+   "kind": "compute",
+   "ip": "192.168.77.10",
+   "role": "中心 LLM（310B1 / 24 GB）",
+   "online": true,
+   "hostname": "QiZhi01-20T",
+   "uptime_s": 359327,
+   "interfaces": [
+    {
+     "name": "eth0",
+     "mac": "96:c8:50:ff:a4:01",
+     "state": "DOWN",
+     "carrier": false,
+     "speed_mbps": null,
+     "speed_raw": null,
+     "mtu": 1500,
+     "driver": "hns3-platform",
+     "bus": "platform",
+     "media": "SoC 板载 GMAC",
+     "media_basis": "driver=hns3-platform, 总线=platform",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": []
+    },
+    {
+     "name": "eth1",
+     "mac": "7a:12:10:7f:f9:be",
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "speed_raw": 1000,
+     "mtu": 1500,
+     "driver": "hns3-platform",
+     "bus": "platform",
+     "media": "SoC 板载 GMAC",
+     "media_basis": "driver=hns3-platform, 总线=platform",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": [
+      "192.168.137.100/24",
+      "192.168.77.10/24"
+     ]
+    }
+   ],
+   "neigh": [
+    {
+     "ip": "192.168.137.1",
+     "dev": "eth1",
+     "state": "INCOMPLETE"
+    },
+    {
+     "ip": "192.168.77.1",
+     "dev": "eth1",
+     "mac": "6c:1f:f7:24:72:33",
+     "state": "REACHABLE"
+    }
+   ],
+   "routes": [
+    "default via 192.168.137.1 dev eth1 proto static metric 100",
+    "192.168.77.0/24 dev eth1 proto kernel scope link src 192.168.77.10 metric 100",
+    "192.168.137.0/24 dev eth1 proto kernel scope link src 192.168.137.100 metric 100"
+   ],
+   "forwarding": {
+    "ip_forward": 0,
+    "bridges": [],
+    "proxy_arp": {
+     "all": 0,
+     "bond0": 0,
+     "can2": 0,
+     "default": 0,
+     "eth0": 0,
+     "eth1": 0,
+     "lo": 0,
+     "usb0": 0
+    }
+   },
+   "probe": {
+    "method": "ssh",
+    "ok": true,
+    "alias": "ascend",
+    "latency_s": 0.45
+   },
+   "lab_interface": "eth1",
+   "lab_media": "SoC 板载 GMAC",
+   "lab_speed_mbps": 1000,
+   "lab_mac": "7a:12:10:7f:f9:be",
+   "uplink": {
+    "type": "switch"
+   },
+   "idle_ports": [
+    {
+     "name": "eth0",
+     "media": "SoC 板载 GMAC",
+     "state": "DOWN",
+     "carrier": false,
+     "speed_mbps": null,
+     "relay_port": false,
+     "note": "未插线"
+    }
+   ]
+  },
+  {
+   "id": "rk3588",
+   "label": "RK3588 LubanCat",
+   "kind": "edge",
+   "ip": "192.168.77.21",
+   "role": "端侧视觉 / 事件复核",
+   "online": true,
+   "hostname": "lubancat",
+   "uptime_s": 1740,
+   "interfaces": [
+    {
+     "name": "eth0",
+     "mac": "02:04:f3:af:68:6e",
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "speed_raw": 1000,
+     "mtu": 1500,
+     "driver": "rk_gmac-dwmac",
+     "bus": "platform",
+     "media": "SoC 板载 GMAC",
+     "media_basis": "driver=rk_gmac-dwmac, 总线=platform",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": [
+      "192.168.77.23/32"
+     ]
+    },
+    {
+     "name": "eth1",
+     "mac": "fe:04:f3:af:68:6e",
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "speed_raw": 1000,
+     "mtu": 1500,
+     "driver": "rk_gmac-dwmac",
+     "bus": "platform",
+     "media": "SoC 板载 GMAC",
+     "media_basis": "driver=rk_gmac-dwmac, 总线=platform",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": [
+      "192.168.77.21/24"
+     ]
+    }
+   ],
+   "neigh": [
+    {
+     "ip": "192.168.77.1",
+     "dev": "eth1",
+     "mac": "6c:1f:f7:24:72:33",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.22",
+     "dev": "eth0",
+     "mac": "4e:0e:39:be:41:b3",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.22",
+     "dev": "eth1",
+     "state": "FAILED"
+    }
+   ],
+   "routes": [
+    "192.168.77.0/24 dev eth1 proto kernel scope link src 192.168.77.21 metric 102",
+    "192.168.77.22 dev eth0 proto static scope link metric 103"
+   ],
+   "forwarding": {
+    "ip_forward": 1,
+    "bridges": [],
+    "proxy_arp": {
+     "all": 0,
+     "default": 0,
+     "dummy0": 0,
+     "eth0": 1,
+     "eth1": 1,
+     "lo": 0,
+     "usb0": 0
+    }
+   },
+   "probe": {
+    "method": "ssh",
+    "ok": true,
+    "alias": "rk3588",
+    "latency_s": 0.76
+   },
+   "lab_interface": "eth1",
+   "lab_media": "SoC 板载 GMAC",
+   "lab_speed_mbps": 1000,
+   "lab_mac": "fe:04:f3:af:68:6e",
+   "uplink": {
+    "type": "switch"
+   },
+   "idle_ports": [
+    {
+     "name": "eth0",
+     "media": "SoC 板载 GMAC",
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "relay_port": true,
+     "note": "三层中继口（/32 中转，对端在此口二层）"
+    }
+   ]
+  },
+  {
+   "id": "rv1126b",
+   "label": "RV1126B Nano-TB",
+   "kind": "edge",
+   "ip": "192.168.77.22",
+   "role": "三摄采集 / YOLOv8n",
+   "online": true,
+   "hostname": "EASY-EAI-NANO-TB",
+   "uptime_s": 168675,
+   "interfaces": [
+    {
+     "name": "eth0",
+     "mac": "4e:0e:39:be:41:b3",
+     "state": "UP",
+     "carrier": true,
+     "speed_mbps": 1000,
+     "speed_raw": 1000,
+     "mtu": 1500,
+     "driver": "rk_gmac-dwmac",
+     "bus": "platform",
+     "media": "SoC 板载 GMAC",
+     "media_basis": "driver=rk_gmac-dwmac, 总线=platform",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": [
+      "192.168.77.22/24"
+     ]
+    },
+    {
+     "name": "eth1",
+     "mac": "a6:52:d5:68:39:f1",
+     "state": "DOWN",
+     "carrier": false,
+     "speed_mbps": null,
+     "speed_raw": 10,
+     "mtu": 1500,
+     "driver": "r8152",
+     "bus": "usb",
+     "media": "USB 转以太网",
+     "media_basis": "driver=r8152, 总线=usb",
+     "kind": "ethernet",
+     "virtual": false,
+     "ipv4": []
+    },
+    {
+     "name": "wlan0",
+     "mac": "ec:30:8e:29:f1:be",
+     "state": "DORMANT",
+     "carrier": true,
+     "speed_mbps": null,
+     "speed_raw": null,
+     "mtu": 1500,
+     "driver": null,
+     "bus": null,
+     "media": "Wi-Fi",
+     "media_basis": "接口名 wlan0",
+     "kind": "wifi",
+     "virtual": false,
+     "ipv4": []
+    }
+   ],
+   "neigh": [
+    {
+     "ip": "192.168.77.1",
+     "dev": "eth0",
+     "mac": "02:04:f3:af:68:6e",
+     "state": "REACHABLE"
+    },
+    {
+     "ip": "192.168.77.23",
+     "dev": "eth0",
+     "mac": "02:04:f3:af:68:6e",
+     "state": "REACHABLE"
+    }
+   ],
+   "routes": [
+    "192.168.77.0/24 dev eth0 proto kernel scope link src 192.168.77.22"
+   ],
+   "forwarding": {
+    "ip_forward": 0,
+    "bridges": [],
+    "proxy_arp": {
+     "all": 0,
+     "can0": 0,
+     "default": 0,
+     "dummy0": 0,
+     "eth0": 0,
+     "eth1": 0,
+     "Featureid0": 0,
+     "lo": 0,
+     "p2p0": 0,
+     "wlan0": 0
+    }
+   },
+   "probe": {
+    "method": "ssh",
+    "ok": true,
+    "alias": "rv1126b",
+    "latency_s": 1.12
+   },
+   "lab_interface": "eth0",
+   "lab_media": "SoC 板载 GMAC",
+   "lab_speed_mbps": 1000,
+   "lab_mac": "4e:0e:39:be:41:b3",
+   "uplink": {
+    "type": "relay",
+    "via": "rk3588",
+    "via_if": "eth0",
+    "relay_enabled": true,
+    "evidence": [
+     "rk3588 路由表含 192.168.77.22/32 dev eth0 → 明确把该主机当作此口下挂",
+     "rk3588 在 eth0 上学到 192.168.77.22 的 MAC 4e:0e:39:be:41:b3 → 对端确在此口二层",
+     "rk3588 ip_forward=1 + eth0.proxy_arp=1 → 由它代答 ARP 做三层中继（同一广播域被拆成两段）"
+    ]
+   },
+   "idle_ports": [
+    {
+     "name": "eth1",
+     "media": "USB 转以太网",
+     "state": "DOWN",
+     "carrier": false,
+     "speed_mbps": null,
+     "relay_port": false,
+     "note": "未插线"
+    }
+   ]
+  }
+ ],
+ "links": [
+  {
+   "from": "rv1126b",
+   "from_if": "eth0",
+   "to": "rk3588",
+   "to_if": "eth0",
+   "layer": "L3",
+   "media": "SoC 板载 GMAC",
+   "media_basis": "driver=rk_gmac-dwmac, 总线=platform",
+   "speed_mbps": 1000,
+   "mac": "4e:0e:39:be:41:b3",
+   "state": "UP",
+   "carrier": true,
+   "relay": true,
+   "peer_confidence": "measured",
+   "peer_evidence": "rk3588 路由表含 192.168.77.22/32 dev eth0 → 明确把该主机当作此口下挂；rk3588 在 eth0 上学到 192.168.77.22 的 MAC 4e:0e:39:be:41:b3 → 对端确在此口二层；rk3588 ip_forward=1 + eth0.proxy_arp=1 → 由它代答 ARP 做三层中继（同一广播域被拆成两段）"
+  },
+  {
+   "from": "mac",
+   "from_if": "en5",
+   "to": "sw",
+   "to_if": null,
+   "layer": "L2",
+   "media": "USB 转以太网",
+   "media_basis": "networksetup 硬件端口=「AX88179B」, media=autoselect (1000baseT <full-duplex>)",
+   "speed_mbps": 1000,
+   "mac": "6c:1f:f7:24:72:33",
+   "state": "UP",
+   "carrier": true,
+   "relay": false,
+   "peer_confidence": "inferred",
+   "peer_evidence": "同 /24 二层可达 + 无 LLDP/CDP 数据，对端只能确认为共享介质"
+  },
+  {
+   "from": "ascend",
+   "from_if": "eth1",
+   "to": "sw",
+   "to_if": null,
+   "layer": "L2",
+   "media": "SoC 板载 GMAC",
+   "media_basis": "driver=hns3-platform, 总线=platform",
+   "speed_mbps": 1000,
+   "mac": "7a:12:10:7f:f9:be",
+   "state": "UP",
+   "carrier": true,
+   "relay": false,
+   "peer_confidence": "inferred",
+   "peer_evidence": "同 /24 二层可达 + 无 LLDP/CDP 数据，对端只能确认为共享介质"
+  },
+  {
+   "from": "rk3588",
+   "from_if": "eth1",
+   "to": "sw",
+   "to_if": null,
+   "layer": "L2",
+   "media": "SoC 板载 GMAC",
+   "media_basis": "driver=rk_gmac-dwmac, 总线=platform",
+   "speed_mbps": 1000,
+   "mac": "fe:04:f3:af:68:6e",
+   "state": "UP",
+   "carrier": true,
+   "relay": false,
+   "peer_confidence": "inferred",
+   "peer_evidence": "同 /24 二层可达 + 无 LLDP/CDP 数据，对端只能确认为共享介质"
+  }
+ ],
+ "relay_links": [
+  {
+   "parent": "rk3588",
+   "parent_if": "eth0",
+   "child": "rv1126b",
+   "child_ip": "192.168.77.22",
+   "child_mac": "4e:0e:39:be:41:b3",
+   "relay": true,
+   "evidence": [
+    "rk3588 路由表含 192.168.77.22/32 dev eth0 → 明确把该主机当作此口下挂",
+    "rk3588 在 eth0 上学到 192.168.77.22 的 MAC 4e:0e:39:be:41:b3 → 对端确在此口二层",
+    "rk3588 ip_forward=1 + eth0.proxy_arp=1 → 由它代答 ARP 做三层中继（同一广播域被拆成两段）"
+   ]
+  }
+ ],
+ "flows": [
+  {
+   "from": "rv1126b",
+   "to": "ascend",
+   "label": "成对关键帧 → LLM 复核",
+   "kind": "data"
+  },
+  {
+   "from": "rk3588",
+   "to": "ascend",
+   "label": "事件二次确认（HTTP）",
+   "kind": "data"
+  },
+  {
+   "from": "mac",
+   "to": "ascend",
+   "label": "控制 / 推理调用",
+   "kind": "control"
+  },
+  {
+   "from": "rv1126b",
+   "to": "mac",
+   "label": "MJPEG 视频流",
+   "kind": "control"
+  }
+ ],
+ "unmanaged": [],
+ "reachability": {
+  "ascend": 0.51,
+  "rk3588": 0.7,
+  "rv1126b": 1.19
+ },
+ "limitations": [
+  "交换机不可管理（无 SSH/SNMP），无法读取「设备 → 交换机端口号」映射，星型连线的对端一律标为 inferred。",
+  "未检测到 LLDP/CDP 邻居信息（设备侧未安装 lldpd），因此对端设备型号无法自动确证。",
+  "邻居表只能证明「曾通信过」：离线设备不会出现在邻居表，拓扑仍保留其最后已知位置。",
+  "三层中继链路的父子关系是实测的（/32 主机路由 + 该口学到的 MAC），但中继节点用 proxy ARP 代答，两端看到的对端 MAC 并非对方真实网卡 MAC，因此这条链路上不能靠 MAC 判断物理对端。"
+ ],
+ "counts": {
+  "nodes": 4,
+  "online": 4,
+  "links": 4,
+  "interfaces": 11
+ }
+}

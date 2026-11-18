@@ -1,0 +1,98 @@
+# E01 camera identity binding - RV1126B (rev 2, 2026-11-05)
+# Physical cabling changed: one visible + one thermal camera; ADB cable removed.
+# Source: runs/20261105T053000Z_E01_fixbandwidth (board-side), verified 2026-11-05.
+schema_version: e01-camera-binding-v3
+node_id: rv1126b-easy-eai-nano-tb
+binding_key: ID_PATH
+reverify_after_reboot: true
+cameras:
+  vis0:
+    id_path: "platform-21480000.usb-usb-0:1.2:1.0"
+    capture_node_by_path: /dev/v4l/by-path/platform-21480000.usb-usb-0:1.2:1.0-video-index0
+    observed_capture_node: /dev/video55
+    physical_port: J13 (USB3.0 Type-A, same USB3 hub as J12)
+    usb_bus: "004 (21480000.usb / EHCI)"
+    vid_pid: "1d6c:0103"
+    formats: [MJPG, YUYV, H264]
+    sizes: [1920x1080, 1280x720, 640x480]
+    fps: [30, 25, 15]
+    isoc_alt: 1
+    wMaxPacketSize: 3072
+    reserved_bandwidth_mbps: 24.576
+  thermal0:
+    id_path: "platform-xhci-hcd.0.auto-usb-0:1:1.0"
+    capture_node_by_path: /dev/v4l/by-path/platform-xhci-hcd.0.auto-usb-0:1:1.0-video-index0
+    observed_capture_node: /dev/video53
+    physical_port: USB3 (USB2.0 Type-A), mutually exclusive with USB1 Type-C/ADB
+    usb_bus: "001 (21500000.usb / xhci-hcd USB2 companion)"
+    vid_pid: "0bda:5840"
+    driver: uvcvideo
+    formats: [YUYV]
+    sizes: [256x192, 256x384]
+    fps: [25]
+    isoc_alt_range: [1, 2, 3, 4, 5, 6, 7]
+    firmware_requested_bandwidth_bytes_per_microframe: 3072
+    selected_alt_with_quirk: 3
+    selected_wMaxPacketSize: 1024
+    reserved_bandwidth_mbps: 8.192
+    note: firmware reports inflated dwMaxPayloadTransferSize; requires UVC_QUIRK_FIX_BANDWIDTH
+
+usb_topology:
+  board: EASY-EAI-Nano-TB v1.02
+  source: official spec 2.5 + on-board sysfs, 2026-11-05
+  bus004_ehci_480M:
+    logical: 21480000.usb / EHCI
+    physical: J13 visible camera via hub 05e3:0610 (4-1.2)
+    observed_paths: [4-1.2]
+  j12_j13_note: J12 and J13 are expanded from ONE USB3.0 HUB chip; swapping
+    between them does NOT create a second USB2 controller or extra bandwidth
+  bus001_xhci_usb2_480M:
+    logical: 21500000.usb / xhci-hcd USB2 companion
+    physical: USB3 (USB2.0 Type-A silkscreen), shares USB2 signals with USB1 Type-C
+    usb1_typec: ADB / firmware download (silkscreen USB1)
+    constraint: USB1 and USB3 are mutually exclusive; ADB cable removed => USB3 usable as Host
+    status: occupied by thermal0 (0bda:5840), stable after ADB cable removal
+  bus003_xhci_5000M: USB3.1 hub 05e3:0626 + RTL8153 network card
+  periodic_budget_bytes_per_microframe: 6000
+  concurrent_reservation_bytes_per_microframe: 4096
+  margin_bytes_per_microframe: 1904
+
+option_b_correct_port:
+  goal: make the legacy libiruvc SDK demo work without code changes
+  action: move thermal0 from J12 to the USB3 (USB2.0 Type-A) port, NOT to J13
+  effect: thermal on Bus 001, visible on Bus 004, each with its own 48 MB/s budget
+  cost: USB1/ADB and USB3 are mutually exclusive; ADB flashing later requires
+    unplugging thermal0
+  verify: lsusb -t must show 0bda:5840 under Bus 001 and 1d6c:0103 under Bus 004
+  longrun_note: stop e01-concurrent.service before replugging cameras
+
+required_software_setting:
+  name: UVC_QUIRK_FIX_BANDWIDTH
+  value: 128
+  sysfs: /sys/module/uvcvideo/parameters/quirks
+  persistence: /usr/local/sbin/uvc_quirk_fixbw.sh + uvc-quirk.service (enabled)
+  scope_note: only affects uncompressed formats; MJPG visible camera unaffected
+  effect: thermal alt 7 (3072) -> alt 3 (1024), enabling concurrent streams
+
+verified_concurrent:
+  thermal_fps: 24.92
+  visible_fps: 29.82
+  both_exit_code: 0
+  usb_alloc: "656/800 us (82%)"
+  status: pass
+
+not_applicable:
+  vis1: removed by user
+  second_visible_camera_concurrency: superseded by vis0 + thermal0 goal
+
+verified_split_controllers:
+  date: 2026-11-05
+  v4l2_concurrent: thermal 24.90 fps / visible 29.93 fps, both exit=0
+  rv1126_yolov8_demo: PASS (IR 25.0 fps, VIS running, inference ~75ms, no ENOSPC)
+  rv1126_dual_demo: PASS (ir 732 frames @25.0 fps, vis 389 frames @15.0 fps,
+    queue_dropped=0, saved_pairs=3, events=3, FAR=9.7%, NPU calls=2.6%)
+  with_quirks_0: PASS (both streams + demo) -> split controllers alone are sufficient
+  quirk_decision: keep uvc-quirk.service enabled as a safety net if thermal is
+    ever plugged back to J12/J13 (same bus as visible)
+  30min_stability: e01-split30.service running, board dir
+    /root/eval_runs/20261105T055200Z_E01_split_30min

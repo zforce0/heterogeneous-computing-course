@@ -1,0 +1,62 @@
+# 互联异构计算课程工程 · Git 忽略清单
+# ---------------------------------------------------------------------------
+# 目标：把源码、脚本、文档、小规模实测快照留在仓库；排除缓存、密钥、大二进制
+# 与本机生成物。真正的凭据一律不落盘（SSH 公钥放 ~/.ssh/config，不放这里）。
+
+# 本机/系统
+.DS_Store
+Thumbs.db
+*.swp
+~$*
+*.lock
+
+# 私有配置（只提交模板）
+config/lab.env
+*.env
+!config/lab.env.example
+
+# Python 缓存与虚拟环境
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# 交付打包生成物（用 scripts/package_course_kit.py 重新生成）
+dist/
+*.tar.gz
+*.zip
+
+# WorkBuddy / 文档流水线中间产物
+.workbuddy/
+output/
+stage1/
+stage2/
+stage3/
+
+# 嵌套仓库与其他设备本地历史
+**/.git/
+
+# 编译产物
+build/
+*.o
+*.a
+*.so
+*.dylib
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# 大模型与固件二进制（体积大、许可各异，见 docs/01-environment.md）
+*.rknn
+*.onnx
+*.pt
+*.pth
+*.gguf
+*.bin
+*.data
+
+# 大批量采集图像（保留 dashboard/samples 中的关键帧小样本）
+twocameraOnMAC/captures/
+*.log

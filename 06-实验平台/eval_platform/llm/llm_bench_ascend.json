@@ -1,0 +1,63 @@
+{
+  "generated_at": "2026-11-14T13:11:27+0800",
+  "architecture": "Mac = display/control ONLY; Ascend box = central LLM",
+  "llm_node": "ascend-box (QiZhi01-20T / Atlas 200I A2 / 310B1)",
+  "api": "http://192.168.77.10:8080",
+  "model": "qwen3:0.6b Q4 (GGUF, transferred from Mac Ollama blob)",
+  "ok": 3,
+  "total": 3,
+  "median_decode_tok_per_s": 4.04,
+  "results": [
+    {
+      "case": "high_conf_person",
+      "event_id": 1,
+      "ts_ms": 1791816540816,
+      "label": "person",
+      "score": 0.75,
+      "area_px": 1298,
+      "status": "ok",
+      "wall_s": 8.297,
+      "prompt_tokens": 145,
+      "completion_tokens": 2,
+      "decode_tok_per_s": 4.04,
+      "prompt_tok_per_s": 12.22,
+      "verdict": "confirm",
+      "finish_reason": "stop",
+      "llm_text": "confirm"
+    },
+    {
+      "case": "low_conf_car",
+      "event_id": 3,
+      "ts_ms": 1791816541082,
+      "label": "car",
+      "score": 0.34,
+      "area_px": 28,
+      "status": "ok",
+      "wall_s": 4.216,
+      "prompt_tokens": 143,
+      "completion_tokens": 2,
+      "decode_tok_per_s": 4.04,
+      "prompt_tok_per_s": 10.86,
+      "verdict": "confirm",
+      "finish_reason": "stop",
+      "llm_text": "confirm"
+    },
+    {
+      "case": "tiny_noise",
+      "event_id": 2,
+      "ts_ms": 1791816540989,
+      "label": "none",
+      "score": 0.0,
+      "area_px": 10,
+      "status": "ok",
+      "wall_s": 4.071,
+      "prompt_tokens": 142,
+      "completion_tokens": 2,
+      "decode_tok_per_s": 3.68,
+      "prompt_tok_per_s": 11.08,
+      "verdict": "reject",
+      "finish_reason": "stop",
+      "llm_text": "reject"
+    }
+  ]
+}

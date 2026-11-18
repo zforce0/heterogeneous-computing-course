@@ -1,0 +1,1873 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>G4 · 互联异构计算实时控制台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080c13; --panel:#0f1622; --panel2:#131c2a; --line:#1e2b40; --line2:#2a3a55;
+  --text:#e6edf7; --muted:#7d8ea6; --dim:#556578;
+  --blue:#4d8dff; --teal:#19c79b; --amber:#f2a93b; --red:#ff5d5d; --purple:#a180ff;
+  --blue-bg:rgba(77,141,255,.12); --teal-bg:rgba(25,199,155,.12);
+  --amber-bg:rgba(242,169,59,.12); --red-bg:rgba(255,93,93,.12);
+}
+html,body{height:100%}
+body{background:
+  radial-gradient(1100px 600px at 12% -8%, rgba(77,141,255,.10), transparent 62%),
+  radial-gradient(900px 520px at 92% 4%, rgba(25,199,155,.08), transparent 60%),
+  var(--bg);
+  color:var(--text);font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums}
+
+/* ── topbar ── */
+.topbar{position:sticky;top:0;z-index:60;backdrop-filter:blur(14px);background:rgba(8,12,19,.82);
+  border-bottom:1px solid var(--line);}
+.topbar .inner{max-width:1600px;margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#4d8dff,#19c79b);
+  display:grid;place-items:center;font-weight:700;font-size:13px;color:#06101c;letter-spacing:-.5px}
+.brand h1{font-size:15px;font-weight:600;letter-spacing:-.2px}
+.brand .s{font-size:11px;color:var(--dim);margin-top:-2px}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-left:6px}
+.pill{display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;
+  border:1px solid var(--line);background:var(--panel);font-size:11.5px;color:var(--muted);cursor:pointer;
+  transition:.18s;white-space:nowrap}
+.pill:hover{border-color:var(--line2);background:var(--panel2)}
+.pill .d{width:7px;height:7px;border-radius:50%;background:var(--dim);transition:.2s}
+.pill.on .d{background:var(--teal);box-shadow:0 0 8px rgba(25,199,155,.9)}
+.pill.off .d{background:var(--red);box-shadow:0 0 8px rgba(255,93,93,.8)}
+.pill.on{color:var(--text)}
+.pill b{font-weight:500}
+.pill .r{color:var(--dim);font-size:10.5px}
+.right{margin-left:auto;display:flex;align-items:center;gap:14px}
+.conn{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted)}
+.pulse{width:8px;height:8px;border-radius:50%;background:var(--teal);position:relative}
+.pulse::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:1px solid rgba(25,199,155,.55);
+  animation:ring 1.8s infinite}
+@keyframes ring{0%{transform:scale(.7);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+.pulse.bad{background:var(--red)} .pulse.bad::after{border-color:rgba(255,93,93,.6)}
+.clock{font-size:12px;color:var(--muted)}
+
+/* ── layout ── */
+.wrap{max-width:1600px;margin:0 auto;padding:16px 20px 60px}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+.card{background:linear-gradient(180deg,rgba(19,28,42,.92),rgba(13,20,30,.94));
+  border:1px solid var(--line);border-radius:14px;position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(120,170,255,.35),transparent)}
+.chd{display:flex;align-items:center;gap:9px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.chd h2{font-size:13px;font-weight:600;letter-spacing:.1px;display:flex;align-items:center;gap:8px}
+.chd .tag{font-size:10.5px;color:var(--dim);font-weight:400}
+.chd .sp{margin-left:auto;display:flex;gap:7px;align-items:center}
+.cbd{padding:14px 16px}
+.s8{grid-column:span 8}.s7{grid-column:span 7}.s6{grid-column:span 6}
+.s5{grid-column:span 5}.s4{grid-column:span 4}.s12{grid-column:span 12}
+@media(max-width:1180px){.s8,.s7,.s5,.s6,.s4{grid-column:span 12}}
+
+/* ── video：双光左右对照 ── */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
+.lens{position:relative;background:#04070b;border:1px solid var(--line);border-radius:10px;
+  overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.lhead{display:flex;align-items:center;gap:7px;padding:7px 10px;border-bottom:1px solid var(--line);
+  background:rgba(14,21,32,.72);font-size:11.5px;color:#c8d8ee;font-weight:500;white-space:nowrap}
+.lhead .dot{width:6px;height:6px;border-radius:50%;background:#3a4658;flex:none}
+.lhead .dot.on{background:#19c79b;box-shadow:0 0 7px rgba(25,199,155,.9)}
+.lhead .dot.off{background:#e0554d;box-shadow:0 0 7px rgba(224,85,77,.7)}
+.lhead .ltag{margin-left:auto;font-size:10px;color:var(--dim);font-family:ui-monospace,monospace;
+  font-weight:400;overflow:hidden;text-overflow:ellipsis}
+.lhead .ltag.on{color:var(--teal)}
+.lhead .ltag.warn{color:var(--red)}
+/* 模型条：两路各自实际加载的模型（端侧上报，换模型重启即变） */
+.lmodel{padding:4px 10px;border-bottom:1px solid var(--line);background:rgba(10,16,26,.55);
+  font-size:10px;color:var(--dim);display:flex;align-items:center;gap:6px;white-space:nowrap;overflow:hidden}
+.lmodel .mk{flex:none;letter-spacing:.5px;color:#6d7f96}
+/* 只有一处截断点：文件名在前、元信息在后，窄了就整行末尾出省略号，
+   不要让 flex 把文件名压成空串（试过 max-width/两个 flex 项，窄屏会把名字先吃掉） */
+.lmodel .mtext{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.lmodel b{font-family:ui-monospace,monospace;font-weight:600;color:#c9d8ec}
+.lmodel .md{font-family:ui-monospace,monospace;color:#7d8ea6;margin-left:7px}
+.lmodel.vis b{color:#9fc4ff}
+.lmodel.ir b{color:#f0c48a}
+.lbody{position:relative;aspect-ratio:4/3;background:#04070b;line-height:0}
+.lbody .stage{position:absolute;inset:0;display:grid;place-items:center}
+.lbody .stage img{display:block;max-width:100%;max-height:100%;width:auto;height:auto}
+.lbody .stage canvas{position:absolute;pointer-events:none}
+.lfoot{padding:6px 10px;border-top:1px solid var(--line);font-size:10.5px;color:var(--dim);
+  min-height:29px;display:flex;align-items:center;gap:8px;line-height:1.4}
+.lfoot .ftext{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lfoot b{color:var(--teal);font-weight:600}
+.lfoot .act{margin-left:auto;color:var(--blue);cursor:pointer;white-space:nowrap}
+.voverlay{position:absolute;inset:0;display:grid;place-items:center;color:var(--dim);font-size:11.5px;
+  background:rgba(4,7,11,.86);text-align:center;padding:16px;pointer-events:none;line-height:1.7}
+.voverlay .ovin{max-width:94%}
+@media(max-width:560px){.duo{grid-template-columns:1fr}}
+.vmeta{position:absolute;left:10px;top:10px;display:flex;gap:6px;flex-wrap:wrap}
+.vchip{background:rgba(6,10,16,.78);border:1px solid rgba(120,160,220,.22);border-radius:7px;
+  padding:3px 8px;font-size:10.5px;color:#cddcf0;display:flex;align-items:center;gap:5px}
+.vchip b{color:var(--teal);font-weight:600}
+.vcorner{position:absolute;right:10px;top:10px;display:flex;gap:6px}
+.vtab{background:rgba(6,10,16,.8);border:1px solid rgba(120,160,220,.22);color:#b9c8dd;border-radius:7px;
+  padding:4px 10px;font-size:11px;cursor:pointer}
+.vtab.act{background:rgba(77,141,255,.85);color:#fff;border-color:transparent}
+
+/* ── kpi ── */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.kpi{background:linear-gradient(180deg,rgba(19,28,42,.9),rgba(12,19,28,.9));border:1px solid var(--line);
+  border-radius:12px;padding:13px 15px;position:relative;overflow:hidden}
+.kpi .l{font-size:10.5px;color:var(--dim);letter-spacing:.4px;text-transform:uppercase}
+.kpi .v{font-size:24px;font-weight:600;letter-spacing:-.8px;margin:4px 0 1px;line-height:1.2}
+.kpi .v small{font-size:12px;font-weight:500;color:var(--muted);margin-left:3px;letter-spacing:0}
+.kpi .s{font-size:10.5px;color:var(--dim)}
+.kpi .glow{position:absolute;right:-24px;bottom:-30px;width:80px;height:80px;border-radius:50%;
+  background:radial-gradient(circle,rgba(77,141,255,.20),transparent 68%)}
+
+/* ── 节点分工（谁在做什么）── */
+.rgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+@media(max-width:1180px){.rgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.rgrid{grid-template-columns:1fr}}
+.rnode{background:rgba(12,19,28,.75);border:1px solid var(--line);border-radius:10px;padding:10px 11px;min-width:0}
+.rnode .rh{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#c8d8ee;font-weight:600}
+.rnode .rh .dot{width:6px;height:6px;border-radius:50%;background:#3a4658;flex:none}
+.rnode .rh .dot.on{background:#19c79b;box-shadow:0 0 7px rgba(25,199,155,.9)}
+.rnode .rh .dot.off{background:#e0554d}
+.rnode .rh .ip{margin-left:auto;font-size:9.5px;color:var(--dim);font-family:ui-monospace,monospace;font-weight:400}
+.rnode .rrole{margin-top:5px;font-size:11.5px;color:var(--teal);font-weight:600}
+.rnode .rdetail{font-size:10px;color:var(--dim);margin:2px 0 7px;line-height:1.45;min-height:29px}
+.rnode .rl{display:flex;gap:6px;font-size:10px;line-height:1.6;min-width:0}
+.rnode .rl .k{flex:none;color:#6d7f96;width:26px}
+.rnode .rl .v{flex:1 1 auto;min-width:0;color:#b9c8dd;font-family:ui-monospace,monospace;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rnode .rl .v .pc{color:#7d8ea6}
+.rnode .err{font-size:10px;color:var(--red);margin-top:5px;line-height:1.4}
+
+/* ── chat ── */
+.chat{display:flex;flex-direction:column;height:100%;min-height:420px}
+.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;max-height:430px}
+.msgs::-webkit-scrollbar{width:6px}.msgs::-webkit-scrollbar-thumb{background:#22314a;border-radius:3px}
+.msg{max-width:92%;font-size:12.5px;line-height:1.65;padding:9px 12px;border-radius:10px;white-space:pre-wrap;word-break:break-word}
+.msg.u{align-self:flex-end;background:rgba(77,141,255,.16);border:1px solid rgba(77,141,255,.3)}
+.msg.a{align-self:flex-start;background:var(--panel2);border:1px solid var(--line)}
+.msg .meta{font-size:10px;color:var(--dim);margin-top:5px;font-family:ui-monospace,monospace}
+.msg .evd{margin-top:7px;padding-top:6px;border-top:1px dashed var(--line);font-size:10.5px;
+  line-height:1.55;color:#7f93ab;font-family:ui-monospace,monospace;cursor:help}
+/* 两类回答的口径角标：台账只列条目，研判只给结论三行，不让人误解 */
+.msg.a.kind-event .body::before,.msg.a.kind-analysis .body::before{
+  display:block;font-size:9.5px;letter-spacing:.06em;font-family:ui-monospace,monospace;
+  margin-bottom:3px}
+.msg.a.kind-event .body::before{content:'事件台账 · 只列条目，不下结论';color:#2dd4bf;opacity:.85}
+.msg.a.kind-analysis .body::before{content:'双光研判 · 判断 / 理由 / 建议';color:#4d8dff;opacity:.9}
+.msg.a.kind-event{border-color:rgba(45,212,191,.25)}
+.msg.a.kind-analysis{border-color:rgba(77,141,255,.28)}
+.msg.a.streaming .meta::after{content:"▋";animation:blink .9s steps(1) infinite;color:var(--blue)}
+@keyframes blink{50%{opacity:0}}
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 8px}
+.chip{font-size:11px;color:var(--muted);border:1px solid var(--line);background:var(--panel);
+  border-radius:999px;padding:4px 10px;cursor:pointer;transition:.15s}
+.chip:hover{color:var(--blue);border-color:rgba(77,141,255,.5)}
+.chip#chipAnalyze{color:var(--blue);border-color:rgba(77,141,255,.45);
+  background:rgba(77,141,255,.08)}
+.chip#chipEvents{color:var(--teal);border-color:rgba(45,212,191,.42);
+  background:rgba(45,212,191,.08)}
+.cin{display:flex;gap:8px;padding:10px 14px 14px;border-top:1px solid var(--line)}
+.cin textarea{flex:1;resize:none;background:#0a111b;border:1px solid var(--line);border-radius:10px;
+  color:var(--text);font:inherit;font-size:12.5px;padding:9px 11px;outline:none;max-height:110px}
+.cin textarea:focus{border-color:rgba(77,141,255,.55)}
+
+/* ── buttons ── */
+.btn{border:1px solid var(--line2);background:var(--panel2);color:var(--text);border-radius:8px;
+  padding:6px 12px;font:inherit;font-size:11.5px;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:#1a2537;border-color:rgba(77,141,255,.5)}
+.btn.pri{background:linear-gradient(135deg,#3f7ff0,#2f6ad6);border-color:transparent;color:#fff}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:4px 9px;font-size:11px}
+
+/* ── charts ── */
+.charts{display:grid;grid-template-columns:1fr;gap:12px}
+.chart{background:#0a111b;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+.chart .t{display:flex;justify-content:space-between;font-size:10.5px;color:var(--dim);margin-bottom:4px}
+.chart .t b{color:var(--text);font-weight:500}
+canvas.spark{width:100%;height:52px;display:block}
+
+/* ── topology ── */
+.topo{width:100%;height:auto;display:block}
+.tn{cursor:pointer}
+.tn:hover rect{filter:brightness(1.2)}
+.tn rect{transition:.25s}
+.flow{stroke-dasharray:5 6;animation:flow 1.1s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-22}}
+.topoLeg{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:6px 4px 0;
+  font-size:10.5px;color:var(--dim);border-top:1px solid rgba(30,43,64,.5);margin-top:2px}
+.lg{display:flex;align-items:center;gap:5px}
+.lg .d{width:7px;height:7px;border-radius:50%;display:inline-block;background:var(--dim)}
+.lg .d.on{background:var(--teal);box-shadow:0 0 6px rgba(25,199,155,.7)}
+.lg .d.off{background:#3a4658}
+.lg .d.warn{background:var(--amber);box-shadow:0 0 6px rgba(242,169,59,.6)}
+.btn.ghost{background:transparent;border:1px solid var(--line2);color:var(--muted);
+  padding:4px 10px;border-radius:7px;font-size:11px;cursor:pointer;transition:.16s}
+.btn.ghost:hover{border-color:var(--blue);color:var(--text);background:var(--blue-bg)}
+.lk.on{stroke:#19c79b;stroke-width:2;opacity:.5}
+.lk.l3.on{stroke:#4d8dff;stroke-width:2;opacity:.65}
+.lk.off{stroke:#3a4658;stroke-width:1.2;stroke-dasharray:4 5;opacity:.9}
+.lk.l3.off{stroke:#3a4658;stroke-width:1.2;stroke-dasharray:2 4}
+.lklab{font-size:9.5px;fill:#8ba0b8;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.lksub{font-size:8.5px;fill:#556880}
+.tn rect.card{fill:#121a26;stroke:rgba(77,141,255,.40);stroke-width:1}
+.tn.off rect.card{fill:#141a24;stroke:#2b3647}
+.tn circle.dot{fill:var(--teal)}
+.tn.off circle.dot{fill:var(--red)}
+.tn text.nm{fill:#e6edf7}
+.tn.off text.nm{fill:#8593a6}
+.tn text.ip{font-size:10.5px;fill:#8798ae;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.tn text.rl{font-size:10px;fill:#5d6f84}
+.chip.ok{fill:rgba(25,199,155,.13);stroke:rgba(25,199,155,.32)}
+.chip.warn{fill:rgba(242,169,59,.14);stroke:rgba(242,169,59,.40)}
+.chip.bad{fill:rgba(255,93,93,.12);stroke:rgba(255,93,93,.32)}
+.chipt{font-size:8.8px;fill:#b0c2d8;font-family:ui-monospace,"SF Mono",Menlo,monospace}
+.topoNotes{margin-top:9px;padding-top:8px;border-top:1px solid rgba(30,43,64,.5);font-size:10.5px;
+  line-height:1.85;color:var(--muted)}
+.topoNotes .nh{color:var(--text);font-weight:500;margin-top:5px;font-size:10.5px}
+.topoNotes .nh:first-child{margin-top:0}
+.topoNotes .nt{color:var(--dim);padding-left:9px}
+
+/* ── keyframes ── */
+.kfs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:13px}
+.kf{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;transition:.18s}
+.kf:hover{border-color:rgba(77,141,255,.5);transform:translateY(-1px)}
+.kf.main{border-color:rgba(77,141,255,.45);box-shadow:0 0 0 1px rgba(77,141,255,.18) inset}
+.kf .h{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;border-bottom:1px solid var(--line)}
+.kf .h .id{font-size:12px;font-weight:600}
+.kf .h .tm{font-size:10.5px;color:var(--dim);font-family:ui-monospace,monospace}
+.kf .pics{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+.kf .pics img{width:100%;height:150px;object-fit:contain;background:#05080d;display:block}
+.kf .b{padding:9px 11px;font-size:11px;color:var(--muted);line-height:1.6}
+.kf .b .r{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:10.5px;
+  border:1px solid var(--line2);color:var(--muted);background:rgba(255,255,255,.03);white-space:nowrap}
+.badge.ok{color:var(--teal);border-color:rgba(25,199,155,.42);background:var(--teal-bg)}
+.badge.warn{color:var(--amber);border-color:rgba(242,169,59,.42);background:var(--amber-bg)}
+.badge.bad{color:var(--red);border-color:rgba(255,93,93,.42);background:var(--red-bg)}
+.badge.blue{color:var(--blue);border-color:rgba(77,141,255,.42);background:var(--blue-bg)}
+.badge.pur{color:var(--purple);border-color:rgba(161,128,255,.42);background:rgba(161,128,255,.12)}
+
+/* ── event log ── */
+.log{max-height:250px;min-height:200px;overflow-y:auto;font-size:11.5px;font-family:ui-monospace,monospace}
+.log::-webkit-scrollbar{width:6px}.log::-webkit-scrollbar-thumb{background:#22314a;border-radius:3px}
+.log .row{display:flex;gap:9px;padding:3px 0;border-bottom:1px dashed rgba(30,43,64,.7)}
+.log .ts{color:var(--dim);flex:none}
+.log .lv{flex:none;width:6px;height:6px;border-radius:50%;margin-top:6px;background:var(--dim)}
+.log .lv.ok{background:var(--teal)}.log .lv.warn{background:var(--amber)}
+.log .lv.bad{background:var(--red)}.log .lv.info{background:var(--blue)}
+.log .lv.evt{background:#8b7bff}   /* 监测事件：目标进出 / 热斑起落 / 亮度突变 */
+.log .m{color:#b9c8dd;word-break:break-word}
+
+.cmds{display:grid;gap:7px}
+.cmd{display:flex;gap:8px;align-items:center;background:#0a111b;border:1px solid var(--line);
+  border-radius:8px;padding:6px 9px;font-size:11px}
+.cmd .t{color:var(--dim);flex:none;min-width:96px}
+.cmd code{flex:1;color:#9fb6d4;font-family:ui-monospace,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmd button{flex:none}
+
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.tbl th{text-align:left;font-weight:500;color:var(--dim);padding:6px 9px;border-bottom:1px solid var(--line);
+  font-size:10.5px;letter-spacing:.3px;text-transform:uppercase;white-space:nowrap}
+.tbl td{padding:7px 9px;border-bottom:1px solid rgba(30,43,64,.55);color:#b9c8dd;white-space:nowrap}
+.tbl td.wrap{white-space:normal;min-width:200px;max-width:300px;line-height:1.5}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(77,141,255,.05)}
+.tbl td.n{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;color:var(--text)}
+.notes{font-size:11.5px;color:var(--muted);line-height:1.9;padding-left:18px}
+.notes li{margin-bottom:3px}
+details summary{cursor:pointer;list-style:none;font-size:12px;color:var(--muted)}
+details summary::-webkit-details-marker{display:none}
+
+/* toast */
+.toasts{position:fixed;right:18px;bottom:18px;z-index:200;display:flex;flex-direction:column;gap:8px}
+.toast{background:#16202f;border:1px solid var(--line2);border-left:3px solid var(--blue);border-radius:9px;
+  padding:9px 13px;font-size:12px;color:var(--text);box-shadow:0 8px 30px rgba(0,0,0,.5);
+  animation:in .25s ease;max-width:340px}
+.toast.ok{border-left-color:var(--teal)}.toast.bad{border-left-color:var(--red)}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+
+/* lightbox */
+.lb{position:fixed;inset:0;z-index:300;background:rgba(4,7,11,.94);display:none;place-items:center;padding:30px}
+.lb.on{display:grid}
+.lb img{max-width:48vw;max-height:82vh;object-fit:contain;border-radius:8px;background:#05080d}
+.lb .pair{display:flex;gap:14px;align-items:center}
+.lb .close{position:absolute;top:16px;right:20px;font-size:22px;color:#8ea2bd;cursor:pointer;background:none;border:none}
+.lb .cap{position:absolute;bottom:22px;left:0;right:0;text-align:center;font-size:12px;color:var(--muted)}
+footer{text-align:center;font-size:10.5px;color:var(--dim);margin-top:20px;line-height:1.8}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="inner">
+  <div class="brand">
+    <div class="logo">G4</div>
+    <div><h1>互联异构计算 · 实时控制台</h1></div>
+  </div>
+  <div class="pills" id="pills"></div>
+  <div class="right">
+    <div class="conn"><span class="pulse" id="pulse"></span><span id="connText">连接中…</span></div>
+    <div class="clock mono" id="clock">--:--:--</div>
+  </div>
+</div></div>
+
+<div class="wrap">
+  <div class="grid" style="margin-bottom:14px">
+    <!-- 实时视觉 -->
+    <div class="card s8">
+      <div class="chd">
+        <h2>双光同屏 <span class="tag" id="visTag">左可见光 / 右热成像 · RV1126B</span></h2>
+        <div class="sp">
+          <button class="btn sm" id="btnSnap">抓拍双光</button>
+          <button class="btn sm" id="btnPause">暂停</button>
+          <button class="btn sm" id="btnFull">全屏</button>
+        </div>
+      </div>
+      <div class="cbd" style="padding:12px 14px 14px">
+        <div class="duo" id="vwrap">
+          <div class="lens" id="lensVis">
+            <div class="lhead"><span class="dot" id="dotVis"></span>可见光
+              <span class="ltag" id="tagVis">--</span></div>
+            <div class="lmodel vis" id="mVis">模型 --</div>
+            <div class="lbody">
+              <div class="stage" id="stageVis">
+                <img id="visStream" alt="可见光实时流">
+                <canvas id="detCanvas"></canvas>
+              </div>
+              <div class="voverlay" id="ovVis">正在连接视频流…</div>
+            </div>
+            <div class="lfoot" id="footVis">—</div>
+          </div>
+          <div class="lens" id="lensIr">
+            <div class="lhead"><span class="dot" id="dotIr"></span>热成像
+              <span class="ltag" id="tagIr">--</span></div>
+            <div class="lmodel ir" id="mIr">模型 --</div>
+            <div class="lbody">
+              <div class="stage" id="stageIr">
+                <img id="irStream" alt="热成像实时流">
+                <canvas id="irCanvas"></canvas>
+              </div>
+              <div class="voverlay" id="ovIr">检测热成像状态…</div>
+            </div>
+            <div class="lfoot" id="footIr">—</div>
+          </div>
+        </div>
+        <div id="detList" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px"></div>
+      </div>
+    </div>
+
+    <!-- LLM 对话 -->
+    <div class="card s4 chat">
+      <div class="chd">
+        <h2>中心 LLM <span class="tag" id="llmTag">昇腾 · qwen3 0.6B</span></h2>
+        <div class="sp"><span class="badge blue" id="tpsBadge">-- tok/s</span></div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+      <div class="chips">
+        <span class="chip" id="chipAnalyze" title="把过去 60 秒双光窗口的真实统计交给中心 LLM 分析">近 1 分钟双光分析</span>
+        <span class="chip" id="chipEvents" title="让中心 LLM 用后端实测事件回答「近一分钟有哪些事件」">近 1 分钟事件</span>
+        <span class="chip" id="chipRoster" title="把后端实时采集的四节点分工/进程/模型作为上下文交给中心 LLM">各节点在跑什么</span>
+        <span class="chip" id="chipReview" title="用当前真实检测结果组一段复核请求（不含任何伪造数值）">事件复核</span>
+        <span class="chip" data-p="用一句话说明你在本实验中的角色。">说明角色</span>
+        <span class="chip" data-p="用三行总结边缘端 LLM 相对云端推理的优势。">边缘优势</span>
+      </div>
+      <div class="cin">
+        <textarea id="chatIn" rows="1" placeholder="向昇腾盒子上的 LLM 发消息（Enter 发送，Shift+Enter 换行）"></textarea>
+        <button class="btn pri" id="btnSend">发送</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpis" id="kpis" style="margin-bottom:14px"></div>
+
+  <!-- 节点分工：谁在做什么、在跑什么模型（SSH 实测，25 s 一轮）-->
+  <div class="card" style="margin-bottom:14px">
+    <div class="chd"><h2>节点分工 <span class="tag" id="rosterTag">SSH 实测 · 25 s 刷新</span></h2>
+      <div class="sp">
+        <button class="btn ghost" id="rosterBtn" title="立即通过 SSH 重采进程/服务/模型">立即刷新</button>
+        <span class="badge" id="rosterAge">--</span>
+      </div></div>
+    <div class="cbd" style="padding:10px 12px 12px">
+      <div class="rgrid" id="rosterGrid">
+        <div class="rnode"><div class="rrole">采集中…</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-bottom:14px">
+    <!-- 拓扑（自动发现）-->
+    <div class="card s7">
+      <div class="chd"><h2>拓扑与链路 <span class="tag" id="topoShape">自动发现</span></h2>
+        <div class="sp">
+          <button class="btn ghost" id="topoRescan" title="重新采集四台设备的网口与链路">重新扫描</button>
+          <span class="badge" id="topoSummary">扫描中…</span>
+        </div></div>
+      <div class="cbd" style="padding:4px 10px 8px">
+        <svg class="topo" id="topoSvg" viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg">
+          <text x="500" y="210" text-anchor="middle" font-size="12" fill="#556578">正在读取各设备网口…</text>
+        </svg>
+        <div class="topoLeg">
+          <span class="lg"><i class="d on"></i>在线链路</span>
+          <span class="lg"><i class="d off"></i>离线 / 无载波</span>
+          <span class="lg"><i class="d warn"></i>线插错口（有载波但无实验地址）</span>
+          <span class="lg" id="topoStamp">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 曲线 -->
+    <div class="card s5">
+      <div class="chd"><h2>实时指标 <span class="tag">近 4 分钟</span></h2>
+        <div class="sp"><span class="badge" id="seriesTag">采样 2s</span></div></div>
+      <div class="cbd"><div class="charts">
+        <div class="chart"><div class="t"><span>节点 RTT</span><b id="rttNow">--</b></div><canvas class="spark" id="cRtt"></canvas></div>
+        <div class="chart"><div class="t"><span>视觉帧率</span><b id="fpsNow">--</b></div><canvas class="spark" id="cFps"></canvas></div>
+        <div class="chart"><div class="t"><span>LLM 吞吐</span><b id="tokNow">--</b></div><canvas class="spark" id="cTok"></canvas></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- 接口自动识别明细 -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="chd"><h2>接口自动识别 <span class="tag">sysfs + iproute2 实测</span></h2>
+      <div class="sp"><span class="badge" id="ifaceCount">--</span></div></div>
+    <div class="cbd" style="padding:0 8px 10px">
+      <div style="overflow-x:auto">
+        <table class="tbl" style="min-width:820px"><thead><tr>
+          <th>设备</th><th>接口</th><th>连接方式</th><th>链路状态</th><th>速率</th>
+          <th>MAC</th><th>IPv4</th><th>判定依据</th>
+        </tr></thead>
+        <tbody id="ifaceRows"><tr><td colspan="8" style="padding:10px;color:var(--dim)">正在扫描各设备网口…</td></tr></tbody></table>
+      </div>
+      <div class="topoNotes" id="topoNotes"></div>
+    </div>
+  </div>
+
+  <!-- 关键帧 -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="chd"><h2>带时间的关键帧 <span class="tag" id="kfTag">RV1126B 双光 · 归档实跑</span></h2>
+      <div class="sp"><span class="badge warn">archived</span></div></div>
+    <div class="cbd"><div class="kfs" id="kfs"></div></div>
+  </div>
+
+  <div class="grid" style="margin-bottom:14px">
+    <div class="card s6">
+      <div class="chd"><h2>控制与命令</h2><div class="sp"><span class="badge" id="ctlTag">视觉服务</span></div></div>
+      <div class="cbd">
+        <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px">
+          <button class="btn" id="btnStart">启动采集</button>
+          <button class="btn" id="btnPauseCam">暂停采集</button>
+          <button class="btn" id="btnStop">停止采集</button>
+          <button class="btn" id="btnBench">跑 3 条基准</button>
+          <button class="btn" id="btnReconnect">重连视频</button>
+        </div>
+        <div class="cmds" id="cmds"></div>
+      </div>
+    </div>
+    <div class="card s6">
+      <div class="chd"><h2>事件流 <span class="tag">SSE 实时</span></h2><div class="sp"><span class="badge" id="evCount">0</span></div></div>
+      <div class="cbd"><div class="log" id="log"></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <div class="chd"><h2>归档实测 · 中心 LLM 用例 <span class="tag">bench_llm_ascend.json</span></h2>
+      <div class="sp"><span class="badge blue" id="benchSummary">--</span></div></div>
+    <div class="cbd" style="padding:4px 8px 8px">
+      <table class="tbl"><thead><tr>
+        <th>用例</th><th>事件</th><th>标签 / score</th><th>面积</th><th>耗时</th><th>decode tok/s</th><th>状态</th>
+      </tr></thead><tbody id="benchRows"></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="chd"><h2>口径与限制</h2></div>
+    <div class="cbd"><details id="notesBox"><summary>展开查看（诚实口径，未测值一律 N/A）</summary><ul class="notes" id="notes" style="margin-top:10px"></ul></details></div>
+  </div>
+
+  <footer id="footer"></footer>
+</div>
+
+<div class="toasts" id="toasts"></div>
+<div class="lb" id="lb"><button class="close" id="lbClose">×</button><div class="pair" id="lbPair"></div><div class="cap" id="lbCap"></div></div>
+
+<script>
+const EMBEDDED = {"generated_at": "2026-11-18 19:35:08 +0800", "title": "互联异构计算 · G4 实时控制台", "architecture": "Mac 仅显示/控制 · 昇腾盒子 = 中心 LLM · RK3588 / RV1126B = 端侧视觉", "api_base": "http://192.168.77.10:8080", "nodes": [{"id": "mac", "name": "MacBook Air M1", "ip": "192.168.77.1", "role": "显示 / 控制", "detail": "dashboard 与编排；不再承担任何 LLM 推理", "spec": "16 GB / 68.25 GB/s（历史 LLM 节点，已退役）", "check_port": null}, {"id": "ascend", "name": "昇腾 QiZhi01-20T", "ip": "192.168.77.10", "role": "中心 LLM", "detail": "llama.cpp · OpenAI 兼容 API :8080", "spec": "310B1 / 20 TOPS INT8 / 10 TFLOPS FP16 / 24 GB / CANN 8.0.RC3", "check_port": 8080}, {"id": "rk3588", "name": "RK3588 LubanCat-5IO", "ip": "192.168.77.21", "role": "端侧视觉 / 事件复核", "detail": "9100 G3 证据服务 + 8081 板端 dashboard；事件送昇腾 LLM 二次确认", "spec": "6 TOPS NPU / 7.73 GiB / Debian 11", "check_port": 9100}, {"id": "rv1126b", "name": "RV1126B Nano-TB", "ip": "192.168.77.22", "role": "三摄采集 / 轻量视觉", "detail": "可见光 YOLOv8m (RKNN) 端侧实时检测 ~7.5 fps（约 77 ms/帧）；热成像端侧检测由 ir_detect 服务承担（同一 RKNN 模型跨模态复用 + 传统 CV 热斑），NPU 推理约 110~130 ms、每 2 帧跑一次（≈2.5 Hz），热斑逐帧（≈5 Hz）；8082 视觉服务在线，MJPEG 已接入本页；热成像 0bda:5840 经 DVP→USB 转接板接入 USB 口 4-1.2（USB2.0），厂商 SDK 以 usbfs 直读", "spec": "2 TOPS NPU / 1.9 GiB / Ubuntu 22.04 / eth0 静态", "check_port": 8082}], "llm": {"endpoint": "http://192.168.77.10:8080/v1/chat/completions", "model": "qwen3:0.6b Q4 GGUF (499 MB, Mac 离线搬运)", "runtime": "llama.cpp b12375 · 盒上源码编译", "backend": "llama.cpp CPU(ARM NEON) on Ascend box — NPU 后端混合执行已穷举验证（RMSNorm/ROPE 回退、Q8_0 量化路径），fp16 与量化 matmul 内核在 CANN 8.0.RC3/310B1 均缺失或未实现，当前栈不可行（见 npu_attempt.md 第二轮）", "bench_ok": 3, "bench_total": 3, "median_tok_s": 4.04, "cases": [{"case": "high_conf_person", "event_id": 1, "ts_ms": 1791816540816, "label": "person", "score": 0.75, "area_px": 1298, "status": "ok", "wall_s": 8.297, "prompt_tokens": 145, "completion_tokens": 2, "decode_tok_per_s": 4.04, "prompt_tok_per_s": 12.22, "verdict": "confirm", "finish_reason": "stop", "llm_text": "confirm"}, {"case": "low_conf_car", "event_id": 3, "ts_ms": 1791816541082, "label": "car", "score": 0.34, "area_px": 28, "status": "ok", "wall_s": 4.216, "prompt_tokens": 143, "completion_tokens": 2, "decode_tok_per_s": 4.04, "prompt_tok_per_s": 10.86, "verdict": "confirm", "finish_reason": "stop", "llm_text": "confirm"}, {"case": "tiny_noise", "event_id": 2, "ts_ms": 1791816540989, "label": "none", "score": 0.0, "area_px": 10, "status": "ok", "wall_s": 4.071, "prompt_tokens": 142, "completion_tokens": 2, "decode_tok_per_s": 3.68, "prompt_tok_per_s": 11.08, "verdict": "reject", "finish_reason": "stop", "llm_text": "reject"}]}, "keyframes": [{"kf": "KF-01", "time": "2026-10-12 22:49:14.888 +0800", "event_id": 2102, "label": "none", "score": 0.0, "area": 11, "dt": 0.25, "persist": 0.0, "vis": "det_20261012_224914_889_vis.jpg", "ir": "det_20261012_224914_889_ir.jpg", "verdict": "reject", "reason": "规则一致", "need_review": null, "llm_status": "ok", "wall_s": 3.554}, {"kf": "KF-02", "time": "2026-10-12 22:49:15.966 +0800", "event_id": 2352, "label": "person", "score": 0.76, "area": 1393, "dt": 8.62, "persist": 15.15, "vis": "det_20261012_224915_968_vis.jpg", "ir": "det_20261012_224915_968_ir.jpg", "verdict": "confirm", "reason": "规则一致", "need_review": null, "llm_status": "ok", "wall_s": 4.495}, {"kf": "KF-03", "time": "2026-10-12 22:49:16.063 +0800", "event_id": 2353, "label": "car", "score": 0.61, "area": 127, "dt": 1.56, "persist": 15.15, "vis": "det_20261012_224916_064_vis.jpg", "ir": "det_20261012_224916_064_ir.jpg", "verdict": "confirm", "reason": "规则一致", "need_review": null, "llm_status": "ok", "wall_s": 4.714}, {"kf": "KF-04", "time": "2026-10-12 22:49:16.157 +0800", "event_id": 2354, "label": "none", "score": 0.0, "area": 13, "dt": 3.5, "persist": 15.15, "vis": "det_20261012_224916_158_vis.jpg", "ir": "det_20261012_224916_158_ir.jpg", "verdict": "confirm", "reason": "规则一致", "need_review": null, "llm_status": "ok", "wall_s": 4.464}], "controls": [{"t": "启动实时控制台", "c": "python3 eval_platform/dashboard/serve_g4.py --port 8899"}, {"t": "复检链路与节点", "c": "bash eval_platform/tools/recheck_lab_link.sh"}, {"t": "昇腾 LLM 服务", "c": "ssh ascend 'systemctl status g4-llm --no-pager'"}, {"t": "实测 LLM 吞吐", "c": "python3 eval_platform/tools/bench_llm_ascend.py"}, {"t": "RV1126B 视觉服务", "c": "ssh rv1126b 'systemctl status camera-preview --no-pager'"}, {"t": "RK3588 事件二次确认", "c": "ssh rk3588 'python3 /home/cat/eval_dashboard/rk_llm_reconfirm.py'"}, {"t": "重建快照数据", "c": "python3 eval_platform/dashboard/build_g4_dashboard.py"}, {"t": "重编端侧两个检测器", "c": "bash eval_platform/tools/build_edge_detectors.sh"}, {"t": "切换可见光模型", "c": "ssh rv1126b \"sed -i 's|^ExecStart=.*|ExecStart=/root/eval_dashboard/yolo_live /userdata/rv1126_test/<新模型>.rknn|' /etc/systemd/system/yolo-live.service && systemctl daemon-reload && systemctl restart yolo-live\""}, {"t": "切换热成像模型", "c": "ssh rv1126b \"sed -i 's|^ExecStart=.*|ExecStart=/root/eval_dashboard/ir_detect /userdata/rv1126_test/<新模型>.rknn --yolo-every 2|' /etc/systemd/system/ir-detect.service && systemctl daemon-reload && systemctl restart ir-detect\""}, {"t": "节点分工实时名单", "c": "curl -s http://127.0.0.1:8899/api/roster?refresh=1 | python3 -m json.tool"}, {"t": "带实时名单问 LLM", "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"现在各节点在跑什么？\"}]}'"}, {"t": "近 1 分钟监测事件（原始事实）", "c": "curl -s 'http://127.0.0.1:8899/api/events?seconds=60' | python3 -m json.tool"}, {"t": "问 LLM 近 1 分钟事件", "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"近一分钟在本地系统中监测到哪些事件？\"}]}'"}, {"t": "问 LLM 双光研判（三行）", "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"近 1 分钟双光事件分析\"}]}'"}, {"t": "双光研判（chip 同一链路）", "c": "curl -sN -X POST http://127.0.0.1:8899/api/analyze/stream -H 'Content-Type: application/json' -d '{\"seconds\":60}'"}], "honest_note": ["关键帧图像沿用 2026-10-12 RV1126B 板端 dual_demo 归档实跑（archived），非本轮新采集。", "热成像实时流按模组原始朝向输出（256×192，2026-11-18 起取消 90° 旋转）；归档关键帧 det_*_ir.jpg 仍是 2026-11-13 物理逆时针旋转 90° 的版本（192×256），两者方向不同，不可直接叠加比对。", "RV1126B 于 2026-11-16 复测确认在线（EASY-EAI-NANO-TB，MAC 4e:0e:39:be:41:b3）：此前「离线」实为板端 eth0 走 DHCP 而网段无 DHCP 服务器、静态 .22 原配在 eth1(NET1)；现 eth0 已改静态并重启验证，RK3588 侧 g4-dhcp.service 兜底。可见光 10 fps 正常。热成像此前报「未枚举」有两个原因：模组 USB 连线脱落；且 TC1-C 自身无 USB 接口，须经 DVP→USB 转接板，厂商 SDK 以 usbfs 独占接口，uvcvideo 因此不创建 /dev/video 节点——按 video4linux 判断会误判为未插入。2026-11-18 重插后实测：0bda:5840 枚举在 RV1126B USB 口 4-1.2（480 Mbps / USB2.0），SDK 出图 4.5 fps（256×192 灰度），控制台连接信息已改为以 USB 层为准。", "板端墙钟漂移：昇腾盒子落后约 15 个月，跨设备协同以单调钟 + RTT 建期限。", "中心 LLM 实际跑在昇腾盒子的 ARM CPU（llama.cpp b12375 源码编译）；NPU 混合执行已完成穷举验证：权重可 offload、算子调度正常，但 fp16 matmul 缺 MatMulV2 NZ 内核、量化 matmul WeightQuantBatchMatmulV2 显式不支持 310B、RmsNorm/RoPE 算子缺失，属 llama.cpp CANN 后端架构级限制（官方仅验证 910B/910C/310P）。详见 npu_attempt.md 第二轮。", "模型为 qwen3:0.6b Q4（499 MB，由 Mac Ollama blob 离线搬运）；0.6B 小模型语义判断能力有限，KF-03/KF-04 的 confirm 结论仅供参考，不作为测量口径。", "GLIBC 2.35 的盒子无法运行官方 Ubuntu ARM64 预编译包（要求 2.38），故全部二进制在盒上源码编译。", "本页实时数据来源：SSE /api/stream 每 2 s 推送节点探测、llama-server Prometheus 指标与 RV1126B status.json；视频为 RV1126B:8082 的 MJPEG 转发（约 8 fps 拉取）。所有 KPI 均为现场实测，缺值显示 -- 而非 0。", "热成像检测（2026-11-18 新增，端侧 RV1126B）：此前热成像通道只有取流与灰度统计，没有任何检测算法——可见光的 YOLOv8 只吃可见光帧，厂商 dual_demo 也只是把可见光检测框按配准投影到热图上，并非对热图推理。现新增 ir_detect 服务（/root/eval_dashboard/ir_detect，源码 eval_platform/tools/ir_detect.cpp，systemd 单元 ir-detect.service）：① 复用同一份 yolov8m_rv1126b.rknn 在 NPU 上对热图推理（热图 256×192 放大到 640×480，同 4:3 无形变），属跨模态复用，分数普遍低于可见光，只能当「疑似」看；② 传统 CV 热斑检测（帧内中位数 + MAD 自适应阈值 + 连通域），逐帧跑，补上无纹理热源。全部数值是 0~255 相对灰度，不是摄氏温度。", "NPU 是共享资源：可见光 yolo_live 与热成像 ir_detect 都在 RV1126B 的 2 TOPS NPU 上排队，单帧 640×640 推理约 77 ms（可见光）/110~130 ms（热成像，含 640×480 上采样与映射）。因此热成像网络推理降频到每 2 帧一次（实测 ~2.5 Hz），热斑仍 5 Hz；实测可见光仍 7.5 fps、热成像 5.0 fps，未出现掉帧堆积。另修正一处此前的口径错误：status.json 里的 ir_fps 旧值 6.5 是把同一帧重复推送算进去的虚高值，现在只统计真正更新过的帧（5.0），与 SDK 实际出图一致。", "节点分工卡（2026-11-18 新增）：后端每 25 s 通过 SSH 在各节点执行 tools/node_roster.py，采集「关键进程 CPU / systemd 服务 / 模型文件」。其中「正在跑的模型」取运行时事实——RV1126B 由 yolo_live 与 ir_detect 自己上报文件名（换模型重启即变），昇腾取 llama.cpp /props 的 model_path；目录扫描只作补充。Mac 因 macOS 权限拿不到 ps，只能确认本服务进程（serve_g4.py）在跑，页面如实标注「其他进程不可枚举」。", "LLM 对话默认把上面这份实时名单作为 system 上下文注入（请求里 ground=false 可关闭），所以问「现在各节点在跑什么」时答案跟随实际状态而非构建期快照；实测 0.6B 在 19 s 内给出四行节点/进程/模型回答，内容与后端名单一致。", "「近 1 分钟监测事件」（2026-11-18 新增）：事件只记状态切换——目标进入/离开视野（连续 8 s 未检出才算离开、连续 2 个采样命中才算进入，避免 YOLO 抖动刷屏；分数 <0.40 的弱检测不发事件，只进「当前稳态」）、热成像热斑起落、可见光帧率跌到 2 fps 以下/恢复、热成像灰度均值跳变 ≥15、节点掉线/恢复、热成像就绪/不可用；「chair 一直在场」这类稳态不进事件流，而是作为一行「当前稳态」附在后面。事实由后端从 2 s 采样里提取（GET /api/events?seconds=60 可核对），LLM 只负责按时间复述，不产生任何原始数字。", "两个问事件的问题口径不同（2026-11-18 拆开）：①「近一分钟在本地系统中监测到哪些事件」= 事件台账，只按时间复述状态切换条目，明确禁止给判断/建议/正常异常评价；②「近 1 分钟双光事件分析」= 双光研判，只给「判断 / 理由 / 建议」三行，禁止逐条复述事件。后端按关键词分流（研判优先于列举，否则「双光事件分析」会被「事件」二字抢走、退化成复述台账；带 confirm/reject 的事件复核请求不接地，直接透传）。两条入口共用同一份 analysis_prompt，避免同一个问题两个说法。页面也用不同角标区分：台账（teal，条目标注事件 N 条）与研判（blue，标注判断/理由/建议）。", "研判的量化与边界（2026-11-18）：判断行的「正常/关注/异常」由后端机械判定——异常事件 >0 判异常；任一路就绪率 <90% 判关注；可见光稳定有目标（命中率 ≥80%）而热成像整窗未报出同名类判关注（跨模态复用权重漏检）；其余为正常。这一行 LLM 不许改写，返回前由后端强制替换成含两路分数的成品（实测 0.6B 会省掉括号或把「关注」写成「异常」）。理由与建议才由 0.6B 生成，全程不给它算数：分差（可见光最高分 − 热成像最高分）、两路命中率、热斑个数、异常条数都由后端从窗口采样里算出，作为气泡下方的「对比」条展示，悬停可看完整证据块。若三次重试仍吐模板占位「一句话」，则删掉该行并标注「本次模型未给出理由与建议」，绝不把占位当结论。"], "source": {"bench": "eval_platform/llm/llm_bench_ascend.json", "keyframes": "/Users/Apple/WorkBuddy/异构计算软件工程_Software/eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/keyframes_ascend.json"}};
+const IMG = {"det_20261012_224914_889_vis.jpg": "samples/det_20261012_224914_889_vis.jpg", "det_20261012_224914_889_ir.jpg": "samples/det_20261012_224914_889_ir.jpg", "det_20261012_224915_968_vis.jpg": "samples/det_20261012_224915_968_vis.jpg", "det_20261012_224915_968_ir.jpg": "samples/det_20261012_224915_968_ir.jpg", "det_20261012_224916_064_vis.jpg": "samples/det_20261012_224916_064_vis.jpg", "det_20261012_224916_064_ir.jpg": "samples/det_20261012_224916_064_ir.jpg", "det_20261012_224916_158_vis.jpg": "samples/det_20261012_224916_158_vis.jpg", "det_20261012_224916_158_ir.jpg": "samples/det_20261012_224916_158_ir.jpg"};
+let STATE = EMBEDDED;
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (v, d) => (v == null || v === '' || Number.isNaN(v)) ? '--' : (typeof v === 'number' ? v.toFixed(d == null ? 1 : d) : v);
+const imgURL = n => IMG[n] || ('samples/' + n);
+
+/* ───────── 状态缓存 ───────── */
+const S = {
+  nodes: {}, rtt: {mac:[],ascend:[],rk3588:[],rv1126b:[]},
+  fps: [], tok: [], times: [],
+  vision: {}, llm: {}, events: [], sse: false, chatBusy: false, paused: false, src: 'vis'
+};
+
+function toast(msg, kind){
+  const el = document.createElement('div');
+  el.className = 'toast ' + (kind || '');
+  el.textContent = msg;
+  $('toasts').appendChild(el);
+  setTimeout(() => { el.style.opacity = 0; el.style.transition = 'opacity .4s'; setTimeout(() => el.remove(), 420); }, 3600);
+}
+
+/* ───────── 静态渲染 ───────── */
+function renderStatic(){
+  $('footer').innerHTML = '数据源：' + esc(STATE.source?.bench || '') + ' / ' + esc(STATE.source?.keyframes || '') +
+    '<br>构建 ' + esc(STATE.generated_at || '') + ' · 实时层 SSE + MJPEG · 前端仅显示与转发，不做推理';
+  $('notes').innerHTML = (STATE.honest_note || []).map(n => '<li>' + esc(n) + '</li>').join('');
+  $('cmds').innerHTML = (STATE.controls || []).map(c =>
+    '<div class="cmd"><span class="t">' + esc(c.t) + '</span><code>' + esc(c.c) + '</code>' +
+    '<button class="btn sm" data-copy="' + esc(c.c) + '">复制</button></div>').join('');
+  $('cmds').querySelectorAll('[data-copy]').forEach(b => b.onclick = () => {
+    navigator.clipboard?.writeText(b.dataset.copy).then(() => toast('已复制命令', 'ok'), () => toast('复制失败', 'bad'));
+  });
+  $('kfTag').textContent = (STATE.keyframes?.length || 0) + ' 组 · 可见光 + 热成像';
+  renderBench();
+  renderKeyframes();
+}
+
+function renderBench(){
+  const rows = (STATE.llm && STATE.llm.cases) || [];
+  const ok = rows.filter(r => r.status === 'ok').length;
+  $('benchSummary').textContent = ok + ' / ' + rows.length + ' 成功 · 中位 ' +
+    fmt(STATE.llm?.median_tok_s, 2) + ' tok/s';
+  $('benchRows').innerHTML = rows.length ? rows.map(r =>
+    '<tr><td>' + esc(r.case) + '</td><td class="n">' + esc(r.event_id ?? '—') + '</td>' +
+    '<td>' + esc(r.label ?? '—') + ' / ' + esc(r.score ?? '—') + '</td>' +
+    '<td class="n">' + esc(r.area_px ?? '—') + '</td>' +
+    '<td class="n">' + (r.wall_s != null ? esc(r.wall_s) + ' s' : '—') + '</td>' +
+    '<td class="n">' + esc(r.decode_tok_per_s ?? '—') + '</td>' +
+    '<td><span class="badge ' + (r.status === 'ok' ? 'ok' : 'bad') + '">' + esc(r.status) + '</span></td></tr>'
+  ).join('') : '<tr><td colspan="7" style="color:var(--dim)">无归档用例</td></tr>';
+}
+
+function renderKeyframes(){
+  $('kfs').innerHTML = (STATE.keyframes || []).map((k, i) => {
+    const main = k.verdict === 'confirm' || k.kf === 'KF-02';
+    const v = String(k.verdict || 'N/A');
+    const cls = v === 'confirm' ? 'ok' : (v === 'reject' ? 'bad' : 'warn');
+    return '<article class="kf' + (main ? ' main' : '') + '" data-i="' + i + '">' +
+      '<div class="h"><span class="id">' + esc(k.kf) + (main ? ' ★' : '') + '</span>' +
+      '<span class="tm">' + esc(k.time) + '</span></div>' +
+      '<div class="pics"><img loading="lazy" src="' + esc(imgURL(k.vis)) + '" alt="visible">' +
+      '<img loading="lazy" src="' + esc(imgURL(k.ir)) + '" alt="thermal"></div>' +
+      '<div class="b"><div class="r">' +
+        '<span class="badge blue">' + esc(k.label) + ' ' + esc(k.score) + '</span>' +
+        '<span class="badge">' + esc(k.area) + ' px²</span>' +
+        '<span class="badge">ΔT ' + esc(k.dt) + ' K</span>' +
+        '<span class="badge ' + cls + '">' + esc(v) + '</span></div>' +
+      esc(k.reason || '') + (k.wall_s ? ' · ' + esc(k.wall_s) + 's' : '') + '</div></article>';
+  }).join('');
+  $('kfs').querySelectorAll('.kf').forEach(el => el.onclick = () => openLightbox(+el.dataset.i));
+}
+
+function openLightbox(i){
+  const k = (STATE.keyframes || [])[i]; if (!k) return;
+  $('lbPair').innerHTML = '<img src="' + esc(imgURL(k.vis)) + '"><img src="' + esc(imgURL(k.ir)) + '">';
+  $('lbCap').textContent = k.kf + ' · ' + k.time + ' · 左可见光 / 右热成像（CCW 90°）· 事件 ' + k.event_id;
+  $('lb').classList.add('on');
+}
+$('lbClose').onclick = () => $('lb').classList.remove('on');
+$('lb').onclick = e => { if (e.target.id === 'lb') $('lb').classList.remove('on'); };
+document.addEventListener('keydown', e => { if (e.key === 'Escape') $('lb').classList.remove('on'); });
+
+/* ───────── 实时：节点 ───────── */
+function renderPills(nodes){
+  const meta = {}; (STATE.nodes || []).forEach(n => meta[n.id] = n);
+  $('pills').innerHTML = Object.values(nodes).map(n => {
+    const m = meta[n.id] || {};
+    return '<div class="pill ' + (n.online ? 'on' : 'off') + '" data-node="' + n.id + '">' +
+      '<span class="d"></span><b>' + esc((m.name || n.id).split(' ')[0]) + '</b>' +
+      '<span class="r mono">' + (n.rtt_ms != null ? n.rtt_ms.toFixed(1) + 'ms' : 'offline') + '</span></div>';
+  }).join('') || '<div class="pill"><span class="d"></span>等待探测…</div>';
+  $('pills').querySelectorAll('[data-node]').forEach(el => el.onclick = () => showNode(el.dataset.node));
+}
+
+function showNode(id){
+  const m = (STATE.nodes || []).find(n => n.id === id) || {};
+  const n = S.nodes[id] || {};
+  toast((m.name || id) + ' · ' + (n.online ? '在线' : '离线') +
+        (n.rtt_ms != null ? ' · RTT ' + n.rtt_ms.toFixed(1) + ' ms' : '') +
+        (m.spec ? ' · ' + m.spec : ''));
+}
+
+/* ───────── 拓扑自动发现 / 数据驱动绘制 ───────── */
+const TOPO = { data: null, ts: 0, busy: false };
+const CARD_W = 186, CARD_H = 70, SW_W = 186, SW_H = 58;
+const PAD = 16, VW = 720, VH = 400;
+
+function rectEdge(cx, cy, w, h, tx, ty){
+  const dx = tx - cx, dy = ty - cy;
+  if (!dx && !dy) return [cx, cy];
+  const sx = dx ? (w / 2) / Math.abs(dx) : 1e9;
+  const sy = dy ? (h / 2) / Math.abs(dy) : 1e9;
+  const k = Math.min(sx, sy);
+  return [cx + dx * k, cy + dy * k];
+}
+function mediaShort(m){
+  if (!m) return '未识别';
+  return String(m).replace('SoC 板载 GMAC', '板载 GMAC')
+    .replace('以太网（未识别型号）', '以太网')
+    .replace('Thunderbolt 扩展网卡', '雷电扩展')
+    .replace('以太网（板载/扩展）', '板载以太网');
+}
+function roleShort(r){
+  if (!r) return '';
+  const t = String(r);
+  return t.length > 21 ? t.slice(0, 20) + '…' : t;
+}
+function mainIface(n){
+  return (n.interfaces || []).find(it => it.name === n.lab_interface) || null;
+}
+function textW(str, fs){
+  let w = 0;
+  for (const ch of String(str)) {
+    w += /[\u3000-\u9fff\uff00-\uffef]/.test(ch) ? fs * 1.0 : fs * 0.56;
+  }
+  return w;
+}
+function chipText(n){
+  const on = !!n.online;
+  const it = mainIface(n);
+  if (!it) return { txt: on ? '无实验网口' : '探测不可达', cls: 'bad' };
+  if (it.carrier === false) return { txt: it.name + ' · 载波断开', cls: 'bad' };
+  if (!on) return { txt: it.name + ' · 主机不可达', cls: 'bad' };
+  const idleUp = (n.idle_ports || []).filter(p => p.carrier);
+  return {
+    txt: it.name + ' · ' + mediaShort(it.media) + ' · ' + (it.speed_mbps ? it.speed_mbps + 'M' : '?'),
+    cls: idleUp.length ? 'warn' : 'ok'
+  };
+}
+
+/* 分层布局：交换机在最左，链路上每跳一级向右一列。
+   级联（如 RV1126B 挂在 RK3588 网口下）会自动多出一列，
+   不再依赖写死的四角槽位——拓扑变了图就跟着变。 */
+function layoutTopo(t){
+  const nodes = t.nodes || [], links = t.links || [];
+  const parent = {};
+  links.forEach(l => {
+    if (!l.from) return;
+    if (l.to === 'sw') parent[l.from] = 'sw';
+    else if (l.to) parent[l.from] = l.to;
+  });
+  const depth = {};
+  const dep = id => {
+    if (depth[id] != null) return depth[id];
+    const p = parent[id];
+    depth[id] = (p && p !== 'sw') ? dep(p) + 1 : 1;
+    return depth[id];
+  };
+  nodes.forEach(n => dep(n.id));
+
+  const cols = {};
+  nodes.forEach(n => { const k = dep(n.id); (cols[k] = cols[k] || []).push(n.id); });
+  const maxD = Math.max(1, ...Object.keys(cols).map(Number));
+  const nCol = maxD + 1;
+  const gapX = nCol > 1
+    ? Math.max(20, Math.min(96, (VW - PAD * 2 - nCol * CARD_W) / (nCol - 1)))
+    : 0;
+  const colX = k => PAD + k * (CARD_W + gapX);
+
+  const pos = {};
+  // 第一列设备均分纵向
+  (cols[1] || []).forEach((id, i, arr) => {
+    const n = arr.length;
+    const gapY = (VH - n * CARD_H) / (n + 1);
+    pos[id] = [colX(1), gapY * (i + 1) + CARD_H * i];
+  });
+  // 更深层：纵向对齐父节点，冲突则下推
+  for (let k = 2; k <= maxD; k++) {
+    (cols[k] || []).forEach(id => {
+      const pf = pos[parent[id]];
+      let y = pf ? pf[1] : PAD;
+      const taken = (cols[k] || []).filter(o => o !== id && pos[o]).map(o => pos[o][1]);
+      let guard = 0;
+      while (taken.some(ty => Math.abs(ty - y) < CARD_H + 12) && guard++ < 8) y += CARD_H + 14;
+      pos[id] = [colX(k), Math.max(PAD, Math.min(VH - CARD_H - PAD, y))];
+    });
+  }
+  const d1 = (cols[1] || []).map(id => pos[id][1] + CARD_H / 2);
+  const swY = d1.length
+    ? (Math.min(...d1) + Math.max(...d1)) / 2 - SW_H / 2
+    : VH / 2 - SW_H / 2;
+  return { pos, sw: [PAD, Math.max(PAD, Math.min(VH - SW_H - PAD, swY))], cols, depth };
+}
+
+function renderTopology(){
+  const t = TOPO.data, svg = $('topoSvg');
+  if (!t || !svg) return;
+  const nodes = t.nodes || [], links = t.links || [];
+  const L = layoutTopo(t);
+  const swX = L.sw[0], swY = L.sw[1];
+  const scx = swX + SW_W / 2;
+  const N = [];
+
+  N.push('<defs><linearGradient id="swg" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0" stop-color="#16233a"/><stop offset="1" stop-color="#0c141f"/></linearGradient></defs>');
+
+  const boxOf = id => {
+    if (id === 'sw') return [swX, swY, SW_W, SW_H];
+    const p = L.pos[id];
+    return p ? [p[0], p[1], CARD_W, CARD_H] : null;
+  };
+
+  // 链路（先画，压在卡片下面）
+  links.forEach(l => {
+    const A = boxOf(l.from), B = boxOf(l.to);
+    if (!A || !B) return;
+    const ac = [A[0] + A[2] / 2, A[1] + A[3] / 2];
+    const bc = [B[0] + B[2] / 2, B[1] + B[3] / 2];
+    const e1 = rectEdge(ac[0], ac[1], A[2], A[3], bc[0], bc[1]);
+    const e2 = rectEdge(bc[0], bc[1], B[2], B[3], ac[0], ac[1]);
+    const up = l.carrier !== false;
+    N.push('<line id="lk-' + esc(l.from) + '-' + esc(l.to) + '" class="lk ' +
+      (up ? 'on' : 'off') + (l.layer === 'L3' ? ' l3' : '') +
+      '" x1="' + e1[0].toFixed(1) + '" y1="' + e1[1].toFixed(1) +
+      '" x2="' + e2[0].toFixed(1) + '" y2="' + e2[1].toFixed(1) + '"/>');
+
+    const horizontal = Math.abs(e2[1] - e1[1]) < 6;
+    const mx = (e1[0] + e2[0]) / 2, my = (e1[1] + e2[1]) / 2;
+    const leftward = e1[0] <= e2[0];
+    const anchor = horizontal ? 'middle' : (leftward ? 'start' : 'end');
+    const tx = horizontal ? mx : mx + (leftward ? 5 : -5);
+    const ty = horizontal ? my - 9 : my - 4;
+    const ifTxt = (l.from_if || '?') + (l.speed_mbps ? ' · ' + l.speed_mbps + 'M' : '');
+    N.push('<text class="lklab" x="' + tx.toFixed(1) + '" y="' + ty.toFixed(1) +
+      '" text-anchor="' + anchor + '">' + esc(ifTxt) + '</text>');
+    // L3 中继链路物理上由「中继侧口 + 子设备口」两段介质拼成，
+    // 标注中继侧的介质（例如 RV1126B 用的是 USB 网卡）更能说明这条边怎么来的
+    const sub = l.layer === 'L3'
+      ? 'L3 中继 · ' + mediaShort(l.to_media || l.media)
+      : mediaShort(l.media);
+    N.push('<text class="lksub" x="' + tx.toFixed(1) + '" y="' + (ty + 12).toFixed(1) +
+      '" text-anchor="' + anchor + '">' + esc(sub) + '</text>');
+  });
+
+  // 交换机 / 共享介质
+  N.push('<rect x="' + swX + '" y="' + swY + '" width="' + SW_W + '" height="' + SW_H +
+    '" rx="12" fill="url(#swg)" stroke="#2a3a55"/>');
+  N.push('<text x="' + scx + '" y="' + (swY + 24) + '" text-anchor="middle" font-size="12" font-weight="600" fill="#c8d8ee">L2 交换机</text>');
+  N.push('<text x="' + scx + '" y="' + (swY + 42) + '" text-anchor="middle" font-size="9.5" fill="#5d708a">' +
+    esc((t.subnet || '') + ' · 不可管理') + '</text>');
+
+  // 节点卡片
+  nodes.forEach(n => {
+    const pos = L.pos[n.id];
+    if (!pos) return;
+    const x = pos[0], y = pos[1];
+    const on = !!n.online;
+    const ch = chipText(n);
+    N.push('<g id="tn-' + esc(n.id) + '" class="tn ' + (on ? 'on' : 'off') + '" data-node="' + esc(n.id) + '">');
+    N.push('<rect class="card" x="' + x + '" y="' + y + '" width="' + CARD_W + '" height="' + CARD_H + '" rx="11"/>');
+    N.push('<circle class="dot" cx="' + (x + 13) + '" cy="' + (y + 15) + '" r="3.9"/>');
+    N.push('<text class="nm" x="' + (x + 24) + '" y="' + (y + 19) + '" font-size="13" font-weight="600">' + esc(n.label) + '</text>');
+    N.push('<text class="ip" x="' + (x + 13) + '" y="' + (y + 38) + '">' + esc(n.ip) + '</text>');
+    const cw = Math.min(CARD_W - 22, textW(ch.txt, 8.8) + 15);
+    N.push('<rect class="chip ' + ch.cls + '" x="' + (x + 11) + '" y="' + (y + 46) + '" width="' + cw + '" height="17" rx="8.5"/>');
+    N.push('<text class="chipt" x="' + (x + 17) + '" y="' + (y + 58) + '">' + esc(ch.txt) + '</text>');
+    N.push('<title>' + esc(n.label + '｜' + n.ip + '｜' + (on ? '在线' : '离线') + '｜' + (n.role || '')) + '</title>');
+    N.push('</g>');
+  });
+
+  svg.innerHTML = N.join('');
+  renderIfaceTable();
+  if (!TOPO.bound) { TOPO.bound = true; bindTopo(); }
+}
+
+function bindTopo(){
+  const svg = $('topoSvg');
+  if (!svg) return;
+  svg.addEventListener('click', ev => {
+    const g = ev.target.closest('g.tn');
+    if (!g) return;
+    const id = g.dataset.node;
+    const n = (TOPO.data?.nodes || []).find(x => x.id === id);
+    if (!n) return;
+    const it = mainIface(n);
+    const parts = [n.label, n.ip, n.online ? '在线' : '离线'];
+    if (it) parts.push(it.name + ' / ' + it.media + ' / ' + (it.speed_mbps ? it.speed_mbps + 'M' : '速率未知'));
+    if ((n.idle_ports || []).length) parts.push('闲置口: ' + n.idle_ports.map(p => p.name).join(','));
+    toast(parts.join(' · '), n.online ? 'ok' : 'bad');
+  });
+}
+
+function renderIfaceTable(){
+  const t = TOPO.data;
+  if (!t) return;
+  const rows = [];
+  let total = 0;
+  (t.nodes || []).forEach(n => {
+    const list = n.interfaces || [];
+    total += list.length;
+    if (!list.length) {
+      rows.push('<tr><td style="padding:7px 9px">' + esc(n.label) + '</td>' +
+        '<td colspan="7" style="padding:7px 9px;color:var(--dim)">' +
+        esc((n.probe || {}).error || '无接口数据') + '</td></tr>');
+      return;
+    }
+    list.forEach((it, i) => {
+      const lab = it.name === n.lab_interface;
+      const rel = it.port_role === 'relay';
+      const ips = (it.ipv4 || []).join(' / ') || '—';
+      rows.push('<tr' + (lab ? ' style="background:rgba(77,141,255,.06)"' : '') + '>' +
+        '<td style="padding:7px 9px;color:var(--text)">' + (i === 0 ? esc(n.label) : '') + '</td>' +
+        '<td class="n" style="padding:7px 9px">' + esc(it.name) +
+        (lab ? ' <span class="badge ok" style="padding:1px 5px;font-size:9px">实验口</span>' : '') +
+        (rel ? ' <span class="badge warn" style="padding:1px 5px;font-size:9px">中继口</span>' : '') +
+        '</td>' +
+        '<td style="padding:7px 9px">' + esc(mediaShort(it.media)) +
+        (rel ? '<br><span style="font-size:9.5px;color:var(--dim)">下挂 ' +
+          esc((it.serves || []).join('、')) + '</span>' : '') + '</td>' +
+        '<td style="padding:7px 9px;color:' + (it.carrier ? 'var(--teal)' : 'var(--dim)') + '">' +
+        esc(it.state) + (it.carrier ? ' · 有载波' : ' · 无载波') + '</td>' +
+        '<td class="n" style="padding:7px 9px">' + (it.speed_mbps ? it.speed_mbps + 'M' : '—') + '</td>' +
+        '<td class="n" style="padding:7px 9px;font-size:10.5px">' + esc(it.mac || '—') + '</td>' +
+        '<td class="n" style="padding:7px 9px;font-size:10.5px">' + esc(ips) + '</td>' +
+        '<td class="wrap" style="padding:7px 9px;font-size:10px;color:var(--dim)">' + esc(it.media_basis || '') + '</td></tr>');
+    });
+  });
+  $('ifaceRows').innerHTML = rows.join('') ||
+    '<tr><td colspan="8" style="padding:9px;color:var(--dim)">暂无接口数据</td></tr>';
+  $('ifaceCount').textContent = total + ' 个接口 · ' + (t.counts?.online || 0) + '/' +
+    (t.counts?.nodes || 0) + ' 在线';
+
+  const notes = [];
+  const SHAPE_CN = {star: 'L2 星型（共享介质）', 'star+relay': '星型 + 三层中继（有设备挂在其网口下）',
+                    hybrid: '混合（含三层转发/桥接）', unknown: '无法判定'};
+  notes.push('<b>形状判定</b>（' + esc(SHAPE_CN[t.shape] || t.shape || '?') + '）');
+  (t.shape_evidence || []).forEach(e => notes.push('· ' + esc(e)));
+  const rl = t.relay_links || [];
+  if (rl.length) {
+    notes.push('<b>三层中继链路</b>（实测：主机路由 + 邻居表 MAC）');
+    rl.forEach(r => notes.push('· ' + esc(r.child + ' → ' + r.parent + '.' + r.parent_if +
+      '（' + r.child_ip + ' / ' + r.child_mac + '）')));
+  }
+  const um = t.unmanaged || [];
+  notes.push('<b>网段内未纳管设备</b>（ARP 可见但不在采集清单）');
+  notes.push('· ' + (um.length ? um.map(u => u.ip + '（' + u.mac + '）').join('、') : '无'));
+  notes.push('<b>口径限制</b>');
+  (t.limitations || []).forEach(e => notes.push('· ' + esc(e)));
+  $('topoNotes').innerHTML = notes.map((e, i) =>
+    e.startsWith('·') ? '<div class="nt">' + e + '</div>' : '<div class="nh">' + e + '</div>').join('');
+}
+
+async function loadTopology(force){
+  if (TOPO.busy) return;
+  TOPO.busy = true;
+  if (force) $('topoSummary').textContent = '重新扫描…';
+  try {
+    const r = await fetch('/api/topology' + (force ? '?refresh=1' : ''), {cache: 'no-store'});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    TOPO.data = d; TOPO.ts = d.generated_ts || 0;
+    $('topoShape').textContent = (d.shape === 'star' ? 'L2 星型自动发现' :
+      d.shape === 'star+relay' ? '星型 + 三层中继' :
+      d.shape === 'hybrid' ? '混合（含转发节点）' : '自动发现');
+    $('topoStamp').textContent = '采样 ' + (d.generated_at || '').slice(11, 19) +
+      ' · ' + (d.counts?.links || 0) + ' 条链路';
+    renderTopology();
+    updateTopo(S.nodes || {});
+  } catch (e) {
+    $('topoSummary').textContent = '采集失败';
+    $('topoSummary').className = 'badge bad';
+    toast('拓扑采集失败：' + e.message, 'bad');
+  } finally {
+    TOPO.busy = false;
+  }
+}
+
+function updateTopo(nodes){
+  const t = TOPO.data;
+  if (!t) return;
+  const list = t.nodes || [];
+  let on = 0;
+  list.forEach(n => {
+    const live = nodes[n.id];
+    const isOn = live ? !!live.online : !!n.online;
+    if (isOn) on++;
+    const g = document.getElementById('tn-' + n.id);
+    if (g) { g.classList.toggle('on', isOn); g.classList.toggle('off', !isOn); }
+  });
+  const onOf = id => { const lv = nodes[id]; return lv ? !!lv.online : true; };
+  (t.links || []).forEach(l => {
+    const lk = document.getElementById('lk-' + l.from + '-' + l.to);
+    if (!lk) return;
+    const up = l.carrier !== false && onOf(l.from) &&
+               (l.to === 'sw' ? true : onOf(l.to));
+    lk.classList.toggle('on', up); lk.classList.toggle('off', !up);
+  });
+  $('topoSummary').textContent = on + ' / ' + list.length + ' 在线';
+  $('topoSummary').className = 'badge ' + (on === list.length ? 'ok' : on >= 2 ? 'warn' : 'bad');
+}
+
+/* ───────── 实时：KPI ───────── */
+function renderKpis(){
+  const nodes = Object.values(S.nodes);
+  const online = nodes.filter(n => n.online).length;
+  const v = S.vision || {}, llm = S.llm || {};
+  const tps = (llm.tok_s != null && llm.tok_s > 0) ? llm.tok_s : null;
+  const items = [
+    {l:'在线节点', v: online + '<small>/ ' + (nodes.length || 4) + '</small>', s: 'Mac · 昇腾 · RK3588 · RV1126B', c:'blue'},
+    {l:'LLM 生成吞吐', v: fmt(tps, 1) + '<small>tok/s</small>',
+     s: (tps ? '最近一次生成' : '空闲 · 发一条对话试试') + ' · 归档中位 ' + fmt(STATE.llm?.median_tok_s, 2), c:'teal'},
+    {l:'视觉帧率', v: fmt(v.vis_fps, 1) + '<small>fps</small>', s: v.ir_ready ? '热成像 ' + fmt(v.ir_fps, 1) + ' fps' : (v.ir_state === 'no_device' ? '热成像 USB 未连接' : '热成像未就绪'), c:'blue'},
+    {l:'推理耗时', v: v.infer_ms != null ? fmt(v.infer_ms, 0) + '<small>ms</small>' : '--', s: (v.detections || []).length + ' 个检测框', c:''},
+    {l:'累计生成', v: llm.tokens_total != null ? llm.tokens_total.toLocaleString() + '<small>tok</small>' : '--', s: 'llama-server 计数器', c:''}
+  ];
+  $('kpis').innerHTML = items.map(i => '<div class="kpi"><div class="glow"></div><div class="l">' + i.l +
+    '</div><div class="v">' + i.v + '</div><div class="s">' + esc(i.s) + '</div></div>').join('');
+  $('tpsBadge').textContent = (tps ? tps.toFixed(1) : '--') + ' tok/s';
+  $('tpsBadge').className = 'badge ' + (tps ? 'blue' : '');
+  $('tokNow').textContent = (tps ? tps.toFixed(1) : '--') + ' tok/s';
+  $('fpsNow').textContent = fmt(v.vis_fps, 1) + ' fps';
+}
+
+/* ───────── 实时：视觉（双光） ───────── */
+const CLASS_CN = {person:'人', chair:'椅子', tvmonitor:'显示器', tv:'显示器', car:'车',
+  bicycle:'自行车', dog:'狗', cat:'猫', bottle:'瓶子', laptop:'笔记本', book:'书',
+  cellphone:'手机', cup:'杯子', keyboard:'键盘', mouse:'鼠标', 'diningtable':'桌子'};
+
+// 把「接在哪个口」翻译成人话：port 是 sysfs 里的 USB 端口路径（如 1-1 / 3-1.2），
+// speed 是实际协商速率（480 / 5000 Mbps）。编号随插口变化，全部来自板端实测。
+function usbSpeedClass(sp){
+  const n = Number(sp);
+  if (!n) return '';
+  if (n >= 5000) return 'USB3.0';
+  if (n >= 480) return 'USB2.0';
+  return 'USB1.x';
+}
+const MODE_CN = {
+  v4l2: 'V4L2 直采',
+  usbfs: '厂商 SDK 独占 usbfs',
+  usb_only: '已枚举 · 无驱动绑定'
+};
+function usbTag(link){
+  if (!link || !link.port) return '';
+  const cls = usbSpeedClass(link.speed);
+  return 'USB ' + link.port + (cls ? ' · ' + cls : '');
+}
+function usbDetail(link){
+  if (!link) return '';
+  if (!link.port) {
+    return link.bus_enum === false
+      ? 'USB 总线上没有该设备（线缆 / 供电未连接）' : '';
+  }
+  const bits = ['USB 口 ' + link.port];
+  if (link.speed) bits.push(Number(link.speed) + ' Mbps');
+  if (link.controller) bits.push(link.controller);
+  if (link.devnum) bits.push('dev ' + link.devnum);
+  if (link.node) bits.push(link.node);
+  if (MODE_CN[link.mode]) bits.push(MODE_CN[link.mode]);
+  return bits.join(' · ');
+}
+
+/* 两路各自的模型条：不做任何硬编码，端侧报什么就显示什么。
+   换模型只要改服务启动参数并重启，这里 2 s 内自动更新（并弹一条切换提示），
+   方便后面横向比不同模型。*/
+const MODEL_SEEN = {};
+function renderModel(id, m, kind){
+  const el = $(id); if (!el) return;
+  const label = kind === 'vis' ? '可见光' : '热成像';
+  if (!m || !m.name) {
+    el.innerHTML = '<span class="mk">模型</span><span class="mtext"><b>--</b>' +
+                   '<span class="md">端侧未上报</span></span>';
+    el.title = label + '侧服务没有上报模型信息（可能未启动或产物过期）';
+    return;
+  }
+  const mb = m.bytes ? (m.bytes / 1048576).toFixed(1) + 'MB' : null;
+  const resTxt = (m.res && m.res.length === 2) ? m.res[0] + '×' + m.res[1] : null;
+  const msTxt = (m.infer_ms != null) ? Math.round(m.infer_ms) + 'ms' : null;
+  const bits = [resTxt, msTxt].filter(Boolean);
+  const full = [m.engine, mb,
+                resTxt ? '输入 ' + resTxt : null,
+                msTxt ? '推理 ' + msTxt : null].filter(Boolean);
+  el.innerHTML = '<span class="mk">模型</span><span class="mtext"><b>' + esc(m.name) + '</b>' +
+                 (bits.length ? '<span class="md">' + esc(bits.join(' · ')) + '</span>' : '') + '</span>';
+  el.title = (m.path || m.name) + (full.length ? '\n' + full.join(' · ') : '');
+  if (MODEL_SEEN[kind] && MODEL_SEEN[kind] !== m.name) {
+    toast(label + '侧模型已切换为 ' + m.name, 'info');
+  }
+  MODEL_SEEN[kind] = m.name;
+}
+
+function renderDetections(){
+  const v = S.vision || {}, dets = v.detections || [];
+  const visOn = !!v.vis_ready && (v.state === 'running' || v.state == null);
+  const irOn = !!v.ir_ready;
+  const linkVis = (v.link || {}).vis || {};
+  const linkIr = (v.link || {}).ir || {};
+
+  renderModel('mVis', v.vis_model, 'vis');
+  renderModel('mIr', v.ir_model, 'ir');
+
+  // 左：可见光
+  $('dotVis').className = 'dot ' + (visOn ? 'on' : 'off');
+  const visPort = usbTag(linkVis);
+  if (visPort) {
+    $('tagVis').textContent = visPort;
+    $('tagVis').className = 'ltag on';
+  } else if (linkVis.bus_enum === false) {
+    $('tagVis').textContent = '未接入 · 线缆断开';
+    $('tagVis').className = 'ltag warn';
+  } else {
+    $('tagVis').textContent = v.state === 'running' ? 'MJPEG · :8082' : (v.state || '--');
+    $('tagVis').className = 'ltag';
+  }
+  $('tagVis').title = usbDetail(linkVis) || '未探测到接入端口';
+  const meta = [];
+  // 「端」= 端侧累计帧号，「页」= 页面真实收到的帧数。两者一起看才分得清
+  // 是端侧停了，还是浏览器这一侧没在更新（后者以前完全看不出来）。
+  if (v.vis_frame != null) meta.push('端 ' + v.vis_frame + ' / 页 ' + (LENS.vis.count || 0));
+  meta.push(fmt(v.vis_fps, 1) + ' fps');
+  if (v.infer_ms != null) meta.push('推理 ' + v.infer_ms + ' ms');
+  $('footVis').innerHTML = '<span class="ftext" title="端 = RV1126B 累计帧号；页 = 本页实际收到并绘制的帧数">' +
+    '<b>' + dets.length + '</b> 目标 · ' +
+    esc(meta.join(' · ')) + '</span><span class="act" data-retry="vis">重连</span>';
+
+  // 右：热成像。接入信息以 USB 层为准——厂商 SDK 以 usbfs 独占时没有 /dev/video 节点，
+  // 但线是否插着、插在哪个口依然可测，不能因为没有节点就说"未枚举"。
+  $('dotIr').className = 'dot ' + (irOn ? 'on' : 'off');
+  const irPort = usbTag(linkIr);
+  const irAbsent = linkIr && linkIr.bus_enum === false;
+  if (irOn) {
+    $('tagIr').textContent = irPort ||
+      ((v.ir_rotation && v.ir_rotation !== 'none') ? 'SDK · ' + v.ir_rotation : 'SDK 直读');
+    $('tagIr').className = 'ltag on';
+  } else if (irPort) {
+    $('tagIr').textContent = irPort + ' · 未出图';
+    $('tagIr').className = 'ltag warn';
+  } else if (irAbsent) {
+    $('tagIr').textContent = '未接入 · 线缆断开';
+    $('tagIr').className = 'ltag warn';
+  } else {
+    $('tagIr').textContent = '未接入';
+    $('tagIr').className = 'ltag';
+  }
+  $('tagIr').title = usbDetail(linkIr) || 'USB 总线上没有 0bda:5840';
+  if (irOn) {
+    const irD = v.ir_det || {};
+    const nY = (irD.yolo || []).length, nB = (irD.blobs || []).length;
+    const detTxt = irD.state === 'running'
+      ? ' · NPU ' + nY + ' · 热斑 ' + nB
+      : ' · 检测未运行';
+    $('footIr').innerHTML = '<span class="ftext" title="端 = RV1126B 累计帧号；页 = 本页实际收到并绘制的帧数；NPU 推理 ' +
+      fmt(irD.infer_ms, 0) + ' ms；热斑来自传统 CV（相对灰度，非温度）">' +
+      '<b>' + fmt(v.ir_fps, 1) + '</b> fps · 端 ' + (v.ir_frame || 0) +
+      ' / 页 ' + (LENS.ir.count || 0) + esc(detTxt) +
+      '</span><span class="act" data-retry="ir">重连</span>';
+  } else {
+    $('footIr').innerHTML = '<span class="ftext">' +
+      esc(v.ir_state === 'no_device' ? 'USB 线缆未连接 · 等待插回' : (v.ir_error || '未就绪')) +
+      '</span><span class="act" data-retry="ir">重试</span>';
+  }
+
+  // 监测清单：同类归并，显示「类别 ×次数 · 最高分」
+  if (!dets.length) {
+    $('detList').innerHTML = '<span class="badge warn">可见光无检测目标</span>';
+  } else {
+    const g = {};
+    dets.forEach(d => {
+      const k = d.name;
+      g[k] = g[k] || {n: 0, s: 0};
+      g[k].n++;
+      g[k].s = Math.max(g[k].s, Number(d.score) || 0);
+    });
+    $('detList').innerHTML = Object.entries(g).sort((a, b) => b[1].s - a[1].s).map(([k, o]) =>
+      '<span class="badge pur">' + esc(CLASS_CN[k] || k) + (CLASS_CN[k] ? ' <span style="opacity:.55">' + esc(k) + '</span>' : '') +
+      ' ×' + o.n + ' · ' + o.s.toFixed(2) + '</span>').join('');
+  }
+  drawBoxes(dets);
+
+  // 热成像端侧检测清单：NPU 目标（蓝）+ 传统 CV 热斑（琥珀）
+  const irD = v.ir_det || {};
+  const irY = irD.yolo || [], irB = irD.blobs || [];
+  const chipsIr = [];
+  if (irD.state === 'running') {
+    const g2 = {};
+    irY.forEach(d => {
+      const k = (d.name || '').trim();
+      g2[k] = g2[k] || {n: 0, s: 0};
+      g2[k].n++;
+      g2[k].s = Math.max(g2[k].s, Number(d.score) || 0);
+    });
+    Object.entries(g2).sort((a, b) => b[1].s - a[1].s).forEach(([k, o]) => {
+      chipsIr.push('<span class="badge blue" title="热成像端侧 NPU：复用可见光 YOLOv8 模型（跨模态），分数通常低于可见光">热·' +
+        esc(CLASS_CN[k] || k) + ' ×' + o.n + ' · ' + o.s.toFixed(2) + '</span>');
+    });
+    if (irB.length) {
+      chipsIr.push('<span class="badge warn" title="传统 CV 热斑：帧内中位数 + MAD 自适应阈值，标注相对灰度亮区，不是温度">热斑 ×' +
+        irB.length + '</span>');
+    }
+    if (!irY.length && !irB.length) chipsIr.push('<span class="badge">热成像无热斑/目标</span>');
+  } else if (v.ir_ready) {
+    chipsIr.push('<span class="badge warn" title="RV1126B 上的 ir-detect 服务没有输出结果">热成像检测未运行</span>');
+  }
+  if (chipsIr.length) $('detList').innerHTML += chipsIr.join('');
+  drawIrBoxes(irD);
+
+  // 每帧状态都校正一次覆盖层：端侧出图 **且页面真收到帧** 才撤掉提示，
+  // 避免「端侧说就绪、页面其实断流」时留一块黑屏、什么都不说。
+  syncOverlay('vis', visOn && streamLive('vis'), visHint());
+  syncOverlay('ir', irOn && streamLive('ir'), irHint());
+}
+
+/* 热成像端侧检测框：实线=NPU（YOLOv8，跨模态复用可见光模型），
+   虚线=传统 CV 热斑（相对灰度亮区，非温度）。两者画在同一张 overlay 上，
+   所以样式必须一眼分清，不能让观众把热斑当成网络检出的目标。*/
+function drawIrBoxes(irD){
+  const img = $('irStream'), cv = $('irCanvas'), stage = $('stageIr');
+  if (!img || !cv || !stage) return;
+  if (!img.naturalWidth || !img.naturalHeight) { cv.width = 0; cv.height = 0; return; }
+  const box = img.getBoundingClientRect(), sb = stage.getBoundingClientRect();
+  const w = box.width, h = box.height;
+  cv.style.left = (box.left - sb.left) + 'px';
+  cv.style.top = (box.top - sb.top) + 'px';
+  cv.style.width = w + 'px';
+  cv.style.height = h + 'px';
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  if (!irD || irD.state !== 'running') return;
+  const CW = w, CH = h;
+  // 框坐标是 IR 原生分辨率（256×192），与 <img> 的 naturalWidth 一致
+  const sx = w / img.naturalWidth, sy = h / img.naturalHeight;
+
+  (irD.blobs || []).forEach(b => {
+    const bb = b.box; if (!bb) return;
+    const bx = bb[0] * sx, by = bb[1] * sy, bw = (bb[2] - bb[0]) * sx, bh = (bb[3] - bb[1]) * sy;
+    ctx.save();
+    ctx.strokeStyle = '#f2a93bcc'; ctx.lineWidth = 1.1; ctx.setLineDash([4, 3]);
+    ctx.strokeRect(bx, by, bw, bh);
+    ctx.restore();
+  });
+
+  (irD.yolo || []).forEach(d => {
+    const bb = d.box; if (!bb) return;
+    const bx = bb[0] * sx, by = bb[1] * sy, bw = (bb[2] - bb[0]) * sx, bh = (bb[3] - bb[1]) * sy;
+    const hue = d.score >= 0.7 ? '#4d8dff' : d.score >= 0.45 ? '#8b7bff' : '#7d8ea6';
+    ctx.strokeStyle = hue; ctx.lineWidth = 1.6;
+    ctx.strokeRect(bx, by, bw, bh);
+    const name = (d.name || '').trim();
+    const label = (CLASS_CN[name] || name) + ' ' + Number(d.score).toFixed(2);
+    ctx.font = '11px ui-monospace,monospace';
+    const tw = ctx.measureText(label).width + 8;
+    const lx = Math.max(0, Math.min(bx, CW - tw));
+    const ly = by - 16 >= 0 ? by - 16 : Math.min(CH - 16, by);
+    ctx.fillStyle = hue + 'dd';
+    ctx.fillRect(lx, ly, tw, 16);
+    ctx.fillStyle = '#05100d';
+    ctx.fillText(label, lx + 4, ly + 12);
+  });
+}
+
+function drawBoxes(dets){
+  const img = $('visStream'), cv = $('detCanvas'), stage = $('stageVis');
+  if (!img || !cv || !stage) return;
+  if (!img.naturalWidth || !img.naturalHeight) { cv.width = 0; cv.height = 0; return; }
+  const box = img.getBoundingClientRect(), sb = stage.getBoundingClientRect();
+  const w = box.width, h = box.height;
+  cv.style.left = (box.left - sb.left) + 'px';
+  cv.style.top = (box.top - sb.top) + 'px';
+  cv.style.width = w + 'px';
+  cv.style.height = h + 'px';
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(w * dpr);
+  cv.height = Math.round(h * dpr);
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  const CW = w, CH = h;
+  const sx = w / img.naturalWidth, sy = h / img.naturalHeight;
+  (dets || []).forEach((d, i) => {
+    const b = d.box; if (!b) return;
+    const bx = b[0] * sx, by = b[1] * sy, bw = (b[2] - b[0]) * sx, bh = (b[3] - b[1]) * sy;
+    const hue = d.score >= 0.7 ? '#19c79b' : d.score >= 0.45 ? '#f2a93b' : '#7d8ea6';
+    ctx.strokeStyle = hue; ctx.lineWidth = 1.6;
+    ctx.strokeRect(bx, by, bw, bh);
+    const label = d.name + ' ' + d.score.toFixed(2);
+    ctx.font = '11px ui-monospace,monospace';
+    const tw = ctx.measureText(label).width + 8;
+    // 标签贴在框上方；靠近画面上/右边缘时翻转到框内并夹住，避免被裁掉
+    const lx = Math.max(0, Math.min(bx, CW - tw));
+    const ly = by - 16 >= 0 ? by - 16 : Math.min(CH - 16, by);
+    ctx.fillStyle = hue + 'dd';
+    ctx.fillRect(lx, ly, tw, 16);
+    ctx.fillStyle = '#05100d';
+    ctx.fillText(label, lx + 4, ly + 12);
+  });
+}
+
+/* ───────── 节点分工：谁在做什么、在跑什么（后端 SSH 实测，前端只渲染）───────── */
+const NODE_META = [
+  ['mac', 'MacBook Air M1', '192.168.77.1'],
+  ['ascend', '昇腾 QiZhi01-20T', '192.168.77.10'],
+  ['rk3588', 'RK3588 LubanCat', '192.168.77.21'],
+  ['rv1126b', 'RV1126B Nano-TB', '192.168.77.22']
+];
+
+function nodeMetrics(n){
+  const m = n.metrics || {}, bits = [];
+  if (m.vis_fps != null) bits.push('可见光 ' + fmt(m.vis_fps, 1) + ' fps');
+  if (m.ir_fps != null) bits.push('热成像 ' + fmt(m.ir_fps, 1) + ' fps');
+  if (m.tok_s != null) bits.push('LLM ' + fmt(m.tok_s, 1) + ' tok/s');
+  if (m.detections != null) bits.push('目标 ' + m.detections + ' 个');
+  return bits.join(' · ') || '--';
+}
+
+function renderRoster(r){
+  if (!r || !r.nodes) return;
+  const age = (r.age_s != null)
+    ? (r.age_s < 90 ? Math.round(r.age_s) + ' s 前' : Math.round(r.age_s / 60) + ' 分钟前')
+    : '--';
+  $('rosterAge').textContent = '采集于 ' + age;
+  $('rosterAge').className = 'badge ' + ((r.age_s != null && r.age_s < 90) ? 'ok' : 'warn');
+
+  $('rosterGrid').innerHTML = NODE_META.map(([id, name, ip]) => {
+    const n = r.nodes[id] || {};
+    const on = n.online === true;
+    const procs = (n.procs || []).length
+      ? n.procs.map(p => '<span title="' + esc(p.args || '') + '">' + esc(p.key) +
+          (p.cpu != null ? ' <span class="pc">' + Math.round(p.cpu) + '%</span>' : '') + '</span>').join(' · ')
+      : '<span class="pc">' + esc(n.error || n.note || '无匹配的关键进程') + '</span>';
+    const models = (n.running_models || []).filter(Boolean).length
+      ? (n.running_models || []).filter(Boolean).map(m => String(m).split('/').pop()).join(' · ')
+      : ((n.models || [])[0] ? (n.models[0].path || '').split('/').pop() : '--');
+    const load = (n.loadavg || []).length ? ' · load ' + n.loadavg[0] : '';
+    return '<div class="rnode" title="' + esc((n.detail || '') + '；rtt ' + (n.rtt_ms != null ? n.rtt_ms : '--') + ' ms' + load) + '">' +
+      '<div class="rh"><span class="dot ' + (on ? 'on' : (n.online === false ? 'off' : '')) + '"></span>' +
+        esc(name) + '<span class="ip">' + esc(ip) + '</span></div>' +
+      '<div class="rrole">' + esc(n.role || '--') + '</div>' +
+      '<div class="rdetail">' + esc(n.detail || '') + '</div>' +
+      '<div class="rl"><span class="k">进程</span><span class="v">' + procs + '</span></div>' +
+      '<div class="rl"><span class="k">模型</span><span class="v" title="' + esc(models) + '">' + esc(models) + '</span></div>' +
+      '<div class="rl"><span class="k">指标</span><span class="v">' + esc(nodeMetrics(n)) + '</span></div>' +
+      '</div>';
+  }).join('');
+}
+
+$('rosterBtn').onclick = async () => {
+  const btn = $('rosterBtn');
+  btn.disabled = true; btn.textContent = '采集中…';
+  try {
+    const d = await (await fetch('/api/roster?refresh=1', {cache: 'no-store'})).json();
+    renderRoster(d);
+    toast('已重采节点名单', 'ok');
+  } catch (e) {
+    toast('采集失败：SSH 不可用', 'bad');
+  } finally {
+    btn.disabled = false; btn.textContent = '立即刷新';
+  }
+};
+
+/* ───────── 双光：两路流同时挂载、各自独立重连 ───────── */
+const LENS = {
+  vis: {img:'visStream', ov:'ovVis', dot:'dotVis', tag:'tagVis', foot:'footVis', url:'/stream/vis.mjpg'},
+  ir:  {img:'irStream',  ov:'ovIr',  dot:'dotIr',  tag:'tagIr',  foot:'footIr',  url:'/stream/ir.mjpg'}
+};
+
+/* 热成像不可用时给出具体原因——区分「线没插」「SDK 取不到帧」两种情况 */
+function irHint(){
+  const v = (S && S.vision) || {};
+  const st = v.ir_state || '';
+  const link = ((v.link || {}).ir) || {};
+  const where = link.port ? '（USB 口 ' + link.port + '）' : '';
+  if (st === 'no_device' || v.ir_usb === false) {
+    return '热成像 USB 线缆未连接<br><span style="font-size:10.5px;color:#5d708a">总线上没有 ' +
+      esc(v.ir_vid_pid || '0bda:5840') + '，检查线缆与供电</span><br><span style="font-size:10.5px;color:#5d708a">插回后自动恢复，无需刷新页面</span>';
+  }
+  if (st === 'sdk_error') {
+    return '热成像模组已接入' + esc(where) + '，SDK 取帧失败<br><span style="font-size:10.5px;color:#5d708a">' +
+      esc(v.ir_error || '未知原因') + '</span>';
+  }
+  if (!v.ir_ready) return '热成像流未就绪<br><span style="font-size:10.5px;color:#5d708a">' + esc(v.ir_error || '等待端侧 SDK 出帧') + '</span>';
+  return '正在等待热成像首帧…<br><span style="font-size:10.5px;color:#5d708a">端侧已出图，页面流重连中，2 秒内自动恢复</span>';
+}
+
+/* 可见光不可用时给出具体原因——区分「线没插 / 模组掉线」和「yolo_live 没输出新帧」 */
+function visHint(){
+  const v = (S && S.vision) || {};
+  const link = ((v.link || {}).vis) || {};
+  if (link.bus_enum === false) {
+    return '可见光模组未接入<br><span style="font-size:10.5px;color:#5d708a">USB 总线上没有该设备（线缆 / 供电）</span>' +
+      '<br><span style="font-size:10.5px;color:#5d708a">插回后自动恢复，无需刷新页面</span>';
+  }
+  if (v.vis_state === 'stale') {
+    return '可见光没有新帧<br><span style="font-size:10.5px;color:#5d708a">' +
+      esc(v.vis_error || 'yolo_live 未输出新帧') + '</span>' +
+      '<br><span style="font-size:10.5px;color:#5d708a">设备恢复后自动继续</span>';
+  }
+  return '可见光流不可用 · 正在自动重连';
+}
+
+/* 页面是否"真的在收帧"——只看这个，不看端侧怎么说。
+   端侧 ir_ready 为 true 而页面断流，是最坑的一种状态：黑屏却无任何提示。 */
+function streamLive(kind){
+  const L = LENS[kind];
+  return Date.now() - (L.lastFrame || 0) < 1500;
+}
+
+/* 覆盖层显隐以「页面有没有收到帧」为准。
+   MJPEG 是长连接，img 的 load 事件几乎不触发，所以不能靠 onload 撤覆盖层。 */
+function syncOverlay(kind, live, hint){
+  const L = LENS[kind], ov = $(L.ov);
+  if (!ov) return;
+  if (live) {
+    if (ov.style.display !== 'none') {
+      ov.style.display = 'none';
+      ov.dataset.why = '';
+    }
+    return;
+  }
+  const html = hint || '';
+  if (ov.dataset.why === html && ov.style.display === 'grid') return;
+  ov.innerHTML = '<div class="ovin">' + html + '</div>';
+  ov.dataset.why = html;
+  ov.style.display = 'grid';
+}
+
+/* ───────── 自己抓流，不用 <img src="x.mjpg"> ─────────
+   交给浏览器托管长连接时，服务端一重启（或网络一断），Chrome 要么停在
+   最后一帧、要么直接黑屏，既不自动重连、也基本不触发 onerror。
+   页面因此完全不知道"帧已经停了"，看起来就像重连失效。
+   改成 fetch + 自己解析 multipart，每帧到达都能留时间戳，
+   覆盖层、看门狗、端侧状态三者才有共同的可靠依据。 */
+const STREAM = {};
+
+function concatBytes(a, b){
+  const out = new Uint8Array(a.length + b.length);
+  out.set(a, 0); out.set(b, a.length);
+  return out;
+}
+function findSeq(buf, seq, from){
+  outer: for (let i = from || 0; i <= buf.length - seq.length; i++){
+    for (let j = 0; j < seq.length; j++) if (buf[i + j] !== seq[j]) continue outer;
+    return i;
+  }
+  return -1;
+}
+
+function stopStream(kind){
+  const st = STREAM[kind];
+  STREAM[kind] = null;
+  if (st) { try { st.ac.abort(); } catch (e) {} }
+}
+
+async function startStream(kind){
+  const L = LENS[kind];
+  if (!$(L.img)) return;
+  stopStream(kind);
+  const ac = new AbortController();
+  const st = {ac: ac, buf: new Uint8Array(0)};
+  STREAM[kind] = st;
+  L.startedAt = Date.now();
+  L.errText = '';
+  try {
+    const res = await fetch(L.url + '?t=' + Date.now(), {cache: 'no-store', signal: ac.signal});
+    if (!res.ok) {
+      const why = await res.text().catch(() => '');
+      throw new Error('HTTP ' + res.status + (why ? ' · ' + why.slice(0, 70) : ''));
+    }
+    const reader = res.body.getReader();
+    for (;;) {
+      const r = await reader.read();
+      if (r.done) break;
+      st.buf = st.buf.length ? concatBytes(st.buf, r.value) : r.value;
+      drainFrames(kind, st);
+    }
+  } catch (err) {
+    if (ac.signal.aborted) return;
+    L.errAt = Date.now();
+    L.errText = String((err && err.message) || err);
+  }
+  if (ac.signal.aborted) return;
+  STREAM[kind] = null;
+  // 服务端把流关了（重启 / 抖动）：自己接回来，不用等人点重连
+  const cool = (L.errAt && Date.now() - L.errAt < 5000) ? 2500 : 800;
+  setTimeout(() => { if (!STREAM[kind]) startStream(kind); }, cool);
+}
+
+/* 解析 multipart/x-mixed-replace：每段形如
+   --frame\r\nContent-Type: ...\r\nContent-Length: N\r\n\r\n<N 字节>\r\n */
+function drainFrames(kind, st){
+  const EOH = [13, 10, 13, 10];
+  for (;;) {
+    const end = findSeq(st.buf, EOH);
+    if (end < 0) {
+      if (st.buf.length > 131072) st.buf = new Uint8Array(0);   // 头都拼不出，丢弃重来
+      return;
+    }
+    const head = new TextDecoder('utf-8').decode(st.buf.subarray(0, end));
+    const m = /content-length:\s*(\d+)/i.exec(head);
+    const start = end + 4;
+    if (!m) { st.buf = st.buf.subarray(start); continue; }
+    const len = Number(m[1]);
+    if (st.buf.length < start + len) return;                    // 帧没接全，等下一块
+    const payload = st.buf.slice(start, start + len);
+    st.buf = st.buf.subarray(start + len);
+    paintFrame(kind, payload);
+  }
+}
+
+function paintFrame(kind, bytes){
+  const L = LENS[kind], img = $(L.img);
+  L.lastFrame = Date.now();
+  L.count = (L.count || 0) + 1;          // 页面真实收到的帧数（不等于端侧帧号）
+  L.pending = L.pending || [];
+  const url = URL.createObjectURL(new Blob([bytes],
+    {type: kind === 'vis' ? 'image/jpeg' : 'image/png'}));
+  const prev = img.dataset.blob;
+  img.dataset.blob = url;
+  img.src = url;
+  // 释放旧 URL 不能挂在 onload 里：下一帧会覆盖 onload，一旦没触发就永久泄漏，
+  // 跑久了内存涨上去，解码开始失败，表现就是"画面不动了"。
+  if (prev) L.pending.push({url: prev, t: Date.now()});
+  while (L.pending.length && Date.now() - L.pending[0].t > 2000) {
+    URL.revokeObjectURL(L.pending.shift().url);
+  }
+}
+
+/* onload 只注册一次，避免每帧生成新闭包 */
+['vis', 'ir'].forEach(kind => {
+  const L = LENS[kind], img = $(L.img);
+  if (!img) return;
+  img.onload = () => {
+    if (kind === 'vis') drawBoxes((S.vision || {}).detections || []);
+  };
+});
+
+function mountLens(kind, why){
+  const L = LENS[kind], ov = $(L.ov);
+  if (!ov) return;
+  L.lastFrame = 0;                  // 归零：覆盖层要等到真收到第一帧才撤
+  L.restartAt = Date.now();
+  ov.dataset.why = '';
+  ov.innerHTML = '<div class="ovin">' +
+    (kind === 'ir' ? irHint() : (why || '正在连接可见光流…')) + '</div>';
+  ov.style.display = 'grid';
+  startStream(kind);
+}
+function mountAll(){ mountLens('vis'); mountLens('ir'); }
+
+/* 看门狗：以「页面最后一次收到帧」为准，而不是端侧帧计数。
+   端侧重启后帧号会归零再涨，看着一直在变，旧逻辑因此从不重挂。 */
+setInterval(() => {
+  ['vis', 'ir'].forEach(kind => {
+    const L = LENS[kind];
+    const limit = kind === 'vis' ? 3000 : 3500;
+    if (Date.now() - (L.lastFrame || 0) < limit) return;
+    if (Date.now() - (L.startedAt || 0) < 2500) return;   // 刚连上，给它时间出首帧
+    startStream(kind);
+  });
+}, 1000);
+
+document.addEventListener('click', e => {
+  const t = e.target && e.target.closest ? e.target.closest('[data-retry]') : null;
+  if (!t) return;
+  mountLens(t.dataset.retry);
+  toast('已重新挂载' + (t.dataset.retry === 'ir' ? '热成像' : '可见光') + '流');
+});
+
+window.addEventListener('resize', () => drawBoxes(S.vision.detections || []));
+
+/* ───────── 实时：曲线 ───────── */
+function drawSpark(cv, lines, opts){
+  const dpr = window.devicePixelRatio || 1;
+  const w = cv.clientWidth || 400, h = cv.clientHeight || 52;
+  if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  ctx.strokeStyle = 'rgba(30,43,64,.75)'; ctx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) { const y = h * i / 4; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+  let max = 0;
+  lines.forEach(l => l.data.forEach(v => { if (v != null && v > max) max = v; }));
+  max = Math.max(max, (opts && opts.min != null) ? opts.min : 1);
+  const span = Math.max(1, Math.max(...lines.map(l => l.data.length)) - 1);
+
+  lines.forEach(l => {
+    ctx.beginPath(); ctx.strokeStyle = l.color; ctx.lineWidth = 1.7; ctx.lineJoin = 'round';
+    let started = false;
+    l.data.forEach((v, i) => {
+      if (v == null) { started = false; return; }
+      const x = w * i / span;
+      const y = h - 3 - (v / max) * (h - 8);
+      if (!started) { ctx.moveTo(x, y); started = true; } else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+    const lastIdx = (() => { for (let i = l.data.length - 1; i >= 0; i--) if (l.data[i] != null) return i; return -1; })();
+    if (lastIdx >= 0) {
+      const x = w * lastIdx / span, y = h - 3 - (l.data[lastIdx] / max) * (h - 8);
+      ctx.beginPath(); ctx.fillStyle = l.color; ctx.arc(x, y, 2.4, 0, 7); ctx.fill();
+    }
+  });
+
+  if (opts && opts.unit) {
+    ctx.fillStyle = 'rgba(125,142,166,.85)'; ctx.font = '9.5px ui-monospace,monospace';
+    ctx.fillText((opts.maxLabel || max.toFixed(0)) + opts.unit, 2, 10);
+  }
+}
+
+function renderCharts(){
+  const rttLines = [
+    {data: S.rtt.ascend, color: '#4d8dff'},
+    {data: S.rtt.rk3588, color: '#19c79b'},
+    {data: S.rtt.rv1126b, color: '#f2a93b'}
+  ];
+  drawSpark($('cRtt'), rttLines, {unit: ' ms', min: 5});
+  drawSpark($('cFps'), [{data: S.fps, color: '#4d8dff'}], {unit: ' fps', min: 4});
+  drawSpark($('cTok'), [{data: S.tok, color: '#19c79b'}], {unit: ' tok/s', min: 2});
+  const asc = S.rtt.ascend.filter(v => v != null);
+  $('rttNow').textContent = asc.length ? asc[asc.length - 1].toFixed(1) + ' ms' : '--';
+}
+
+/* ───────── 实时：事件流 ───────── */
+function renderEvents(){
+  $('evCount').textContent = S.events.length;
+  $('log').innerHTML = S.events.slice(0, 60).map(e =>
+    '<div class="row"><span class="ts">' + esc(e.ts) + '</span><span class="lv ' + esc(e.level) + '"></span>' +
+    '<span class="m">' + esc(e.msg) + '</span></div>').join('') || '<div class="row"><span class="m">等待事件…</span></div>';
+}
+
+/* ───────── SSE ───────── */
+function connect(){
+  if (!location.protocol.startsWith('http')) { setConn(false, '静态打开（无实时层）'); return; }
+  const es = new EventSource('/api/stream');
+  es.onopen = () => { S.sse = true; setConn(true, '实时已连接'); };
+  es.onerror = () => { S.sse = false; setConn(false, '连接中断，重试中…'); };
+  es.onmessage = ev => {
+    let d; try { d = JSON.parse(ev.data); } catch (e) { return; }
+    if (d.type !== 'status') return;
+    const nodes = {};
+    (d.nodes || []).forEach(n => nodes[n.id] = n);
+    S.nodes = nodes; S.vision = d.vision || {}; S.llm = d.llm || {};
+    S.events = d.events || [];
+    if (!S.paused) {
+      renderPills(nodes); updateTopo(nodes); renderKpis(); renderDetections();
+      renderRoster(d.roster);
+    }
+    // 序列
+    ['mac','ascend','rk3588','rv1126b'].forEach(id => {
+      const arr = S.rtt[id]; arr.push(nodes[id] ? nodes[id].rtt_ms : null);
+      if (arr.length > 120) arr.shift();
+    });
+    S.fps.push(S.vision.vis_fps != null ? S.vision.vis_fps : null); if (S.fps.length > 120) S.fps.shift();
+    S.tok.push(S.llm.tok_s != null ? S.llm.tok_s : null); if (S.tok.length > 120) S.tok.shift();
+    renderCharts(); renderEvents();
+    if (d.topo_ts && d.topo_ts !== TOPO.ts) loadTopology();
+    setConn(true, '实时 · ' + d.checked_at);
+  };
+}
+function setConn(ok, text){
+  $('pulse').className = 'pulse' + (ok ? '' : ' bad');
+  $('connText').textContent = text;
+}
+
+setInterval(() => {
+  const d = new Date();
+  $('clock').textContent = d.toLocaleTimeString('zh-CN', {hour12: false});
+}, 1000);
+
+/* ───────── 交互：视觉控制 ───────── */
+$('btnSnap').onclick = async () => {
+  const kinds = (S.vision && S.vision.ir_ready) ? ['vis', 'ir'] : ['vis'];
+  const saved = [];
+  try {
+    for (const k of kinds) {
+      const r = await fetch('/api/snapshot?kind=' + k, {cache: 'no-store'});
+      const d = await r.json();
+      if (d.ok) saved.push(k + ' ' + (d.bytes / 1024).toFixed(0) + 'KB');
+    }
+    if (saved.length) toast('已存证 samples/ · ' + saved.join(' + '), 'ok');
+    else toast('存证失败：当前无可用帧', 'bad');
+  } catch (e) { toast('实时接口不可用', 'bad'); }
+};
+$('btnPause').onclick = () => {
+  S.paused = !S.paused;
+  $('btnPause').textContent = S.paused ? '继续' : '暂停';
+  toast(S.paused ? '已暂停界面刷新（SSE 仍在接收）' : '已恢复刷新');
+};
+$('btnFull').onclick = () => {
+  const el = $('vwrap');
+  if (!el) return;
+  if (document.fullscreenElement) document.exitFullscreen();
+  else if (el.requestFullscreen) el.requestFullscreen();
+};
+document.addEventListener('fullscreenchange', () => setTimeout(() => drawBoxes(S.vision.detections || []), 120));
+$('btnReconnect').onclick = () => { mountAll(); toast('已重新挂载双光视频流'); };
+$('btnStart').onclick = () => ctl('start');
+$('btnPauseCam').onclick = () => ctl('pause');
+$('btnStop').onclick = () => ctl('stop');
+async function ctl(action){
+  try {
+    const r = await fetch('/api/control?action=' + action, {cache: 'no-store'});
+    const d = await r.json();
+    if (d.ok) { toast('视觉服务 → ' + action, 'ok'); setTimeout(mountAll, 800); }
+    else toast('操作失败：' + (d.error || ''), 'bad');
+  } catch (e) { toast('实时接口不可用', 'bad'); }
+}
+
+/* ───────── 交互：LLM 对话（流式） ───────── */
+const msgs = $('msgs'), chatIn = $('chatIn');
+function bubble(role, text){
+  const el = document.createElement('div');
+  el.className = 'msg ' + role;
+  el.innerHTML = '<span class="body">' + esc(text || '') + '</span><div class="meta"></div>';
+  msgs.appendChild(el);
+  msgs.scrollTop = msgs.scrollHeight;
+  return el;
+}
+function sysMsg(t){ bubble('a', t).querySelector('.meta').textContent = 'system'; }
+
+async function send(prompt){
+  if (S.chatBusy) return;
+  if (!prompt) { prompt = chatIn.value.trim(); }
+  if (!prompt) return;
+  chatIn.value = ''; chatIn.style.height = 'auto';
+  bubble('u', prompt).querySelector('.meta').textContent = 'Mac → 昇腾 192.168.77.10';
+  const el = bubble('a', ''); el.classList.add('streaming');
+  const body = el.querySelector('.body'), meta = el.querySelector('.meta');
+  // 研判走非流式（后端要重试兜底），这段时间没有 delta，得给个占位说明
+  meta.textContent = '昇腾生成中…';
+  S.chatBusy = true; $('btnSend').disabled = true;
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/api/llm/stream', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({messages: [{role: 'user', content: prompt}], max_tokens: 160, temperature: 0.2})
+    });
+    if (!r.ok || !r.body) throw new Error('HTTP ' + r.status);
+    const reader = r.body.getReader(); const dec = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      const parts = buf.split('\n\n'); buf = parts.pop();
+      for (const p of parts) {
+        const line = p.trim(); if (!line.startsWith('data:')) continue;
+        let o; try { o = JSON.parse(line.slice(5).trim()); } catch (e) { continue; }
+        if (o.d) { body.textContent += o.d; msgs.scrollTop = msgs.scrollHeight; }
+        if (o.done) {
+          el.classList.remove('streaming');
+          // 研判三行由后端做过换行规整（只补换行不改字），结束后用它覆盖一次
+          if (o.intent === 'analysis' && o.text) body.textContent = o.text;
+          const dt = ((performance.now() - t0) / 1000).toFixed(2);
+          meta.textContent = '昇腾盒子 · ' + dt + ' s' + (o.tok_s ? ' · ' + o.tok_s + ' tok/s' : '') +
+            (o.timings ? ' · ' + o.timings.predicted_n + ' tok' : '');
+          // 两类问答各挂各的事实条：台账条列条目（teal），研判条列跨模态对比（blue）。
+          // 后端已经分流，这里只按 intent 上角标，避免两个回答看起来像一回事。
+          if (o.events_text) {
+            el.classList.add('kind-event');
+            const lines = o.events_text.split('\n').filter(Boolean);
+            const items = lines.filter(l => /^\d+\)/.test(l));
+            const steady = (lines.find(l => l.indexOf('当前稳态') === 0) || '')
+              .replace('当前稳态（不是事件）：', '');
+            // 只取可见光那一段，避免把「热成像…」截成半句
+            let short = steady.split('；')[0];
+            if (short.length > 46) short = short.slice(0, 46) + '…';
+            const head = items.length
+              ? '事件 ' + items.length + ' 条 · ' + items[0].replace(/^\d+\)\s*/, '')
+              : '窗口内 0 条状态变化';
+            const box = document.createElement('div');
+            box.className = 'evd';
+            box.title = o.events_text;
+            box.textContent = '台账 · ' + head + (short ? ' ｜ 持续 ' + short : '') +
+              ' ｜ 悬停看完整事件块';
+            el.appendChild(box);
+          } else if (o.evidence) {
+            el.classList.add('kind-analysis');
+            const box = document.createElement('div');
+            box.className = 'evd';
+            box.title = o.evidence_text || '';
+            box.textContent = '对比 · ' + evSummary(o.evidence) + ' ｜ 悬停看完整证据';
+            el.appendChild(box);
+          }
+        }
+        if (o.error) { body.textContent = '调用失败：' + o.error; el.classList.remove('streaming'); }
+      }
+    }
+  } catch (e) {
+    body.textContent = '实时接口不可用：' + e.message + '（请用 serve_g4.py 打开页面）';
+    el.classList.remove('streaming');
+  } finally {
+    S.chatBusy = false; $('btnSend').disabled = false;
+    if (el.classList.contains('streaming')) el.classList.remove('streaming');
+  }
+}
+$('btnSend').onclick = () => send();
+chatIn.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+document.querySelectorAll('.chip[data-p]').forEach(c => c.onclick = () => send(c.dataset.p));
+$('chipRoster').onclick = () => send('现在四个节点分别负责什么、各自在跑哪个模型或关键进程？每行一个节点，最多四行。');
+$('chipEvents').onclick = () => send('近一分钟在本地系统中监测到哪些事件？');
+
+/* 事件复核：用当前真实的检测结果组请求，不塞任何编造的数值
+   （热成像只有相对灰度，没有温度，所以这里不出现 ΔT/摄氏度） */
+function askReview(){
+  const v = S.vision || {}, dets = v.detections || [], iy = (v.ir_det || {}).yolo || [];
+  if (!dets.length && !iy.length) { toast('当前没有检测目标，无法组复核请求', 'bad'); return; }
+  let txt = '';
+  if (dets.length) {
+    const d = dets[0], b = d.box || [0, 0, 0, 0];
+    const area = Math.max(0, b[2] - b[0]) * Math.max(0, b[3] - b[1]);
+    txt = '事件：可见光检测到 ' + d.name + '，分数 ' + Number(d.score).toFixed(2) +
+          '，框面积 ' + area + ' 平方像素';
+  } else {
+    txt = '事件：可见光窗口内无目标';
+  }
+  txt += iy.length
+    ? '；热成像 NPU 同侧报出 ' + iy.slice(0, 2).map(y => y.name + ' ' + Number(y.score).toFixed(2)).join('、')
+    : '；热成像 NPU 未报出目标';
+  send(txt + '。热成像只有相对灰度、没有温度。请判断是否值得复核，只回答 confirm 或 reject，并给一行理由。');
+}
+
+/* ───────── 交互：近 1 分钟双光事件分析 ─────────
+   证据由后端从真实采样聚合（30 次 × 2s），LLM 只负责解释，不产生任何原始数字。 */
+/* 研判口径的证据条：强调跨模态量化对比，不只报两路 fps。
+   数字全部来自后端 /api/analyze 的聚合，这里只做排布，不重算。 */
+function evSummary(ev){
+  if (!ev) return '';
+  const v = ev.vis || {}, i = ev.ir || {}, D = i.det || {};
+  const top = (v.classes || [])[0];
+  const ir = (D.classes || []).find(c => top && c.name === top.name);
+  const bits = [ev.samples + ' 次采样 / ' + Math.round(ev.seconds) + 's'];
+  if (top) {
+    let s = '可见光 ' + top.name + ' ' + top.hit + '/' + top.of + ' max' + Number(top.max).toFixed(2);
+    if (ir) {
+      const diff = Math.round((top.max - ir.max) * 100) / 100;
+      s += ' ↔ 热成像 ' + ir.hit + '/' + ir.of + ' max' + Number(ir.max).toFixed(2) +
+           '（' + (diff >= 0 ? '-' : '+') + Math.abs(diff) + '）';
+    } else {
+      s += ' ↔ 热成像未报出同类';
+    }
+    bits.push(s);
+  } else {
+    bits.push('可见光窗口内无目标');
+  }
+  if (D.blob_n_avg != null) bits.push('热斑 ' + Number(D.blob_n_avg).toFixed(1) + '/帧');
+  const L = i.lum;
+  if (L) bits.push('灰度均值 ' + L.mean_avg);
+  bits.push('异常 ' + (ev.abnormal_n || 0) + ' 条');
+  return bits.join(' · ');
+}
+
+async function analyzeWindow(secs){
+  if (S.chatBusy) return;
+  bubble('u', '近 ' + Math.round(secs / 60) + ' 分钟双光事件分析')
+    .querySelector('.meta').textContent = 'RV1126B 双光窗口 → 昇腾 192.168.77.10';
+  const el = bubble('a', ''); el.classList.add('streaming');
+  const body = el.querySelector('.body'), meta = el.querySelector('.meta');
+  meta.textContent = '聚合窗口数据…';
+  S.chatBusy = true; $('btnSend').disabled = true;
+  const t0 = performance.now();
+  try {
+    const r = await fetch('/api/analyze/stream', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({seconds: secs, max_tokens: 130})
+    });
+    if (!r.ok) {
+      const j = await r.json().catch(() => ({}));
+      throw new Error(j.error || ('HTTP ' + r.status));
+    }
+    const reader = r.body.getReader(); const dec = new TextDecoder();
+    let buf = '', nChunk = 0;
+    while (true) {
+      const {value, done} = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, {stream: true});
+      const parts = buf.split('\n\n'); buf = parts.pop();
+      for (const p of parts) {
+        const line = p.trim(); if (!line.startsWith('data:')) continue;
+        let o; try { o = JSON.parse(line.slice(5).trim()); } catch (e) { continue; }
+        if (o.d) {
+          body.textContent += o.d; msgs.scrollTop = msgs.scrollHeight;
+          meta.textContent = '昇腾生成中 · ' + (++nChunk) + ' 块 · ' +
+            ((performance.now() - t0) / 1000).toFixed(1) + ' s';
+        }
+        if (o.done) {
+          el.classList.remove('streaming');
+          if (o.intent === 'analysis' && o.text) body.textContent = o.text;
+          const dt = ((performance.now() - t0) / 1000).toFixed(2);
+          meta.textContent = '昇腾 · ' + dt + ' s' + (o.tok_s ? ' · ' + o.tok_s + ' tok/s' : '') +
+            (o.timings ? ' · ' + o.timings.predicted_n + ' tok' : '');
+          if (o.evidence) {
+            el.classList.add('kind-analysis');
+            const box = document.createElement('div');
+            box.className = 'evd';
+            box.title = o.evidence_text || '';
+            box.textContent = '对比 · ' + evSummary(o.evidence) + ' ｜ 悬停看完整证据';
+            el.appendChild(box);
+          }
+        }
+        if (o.error) { body.textContent = '分析失败：' + o.error; el.classList.remove('streaming'); }
+      }
+    }
+  } catch (e) {
+    body.textContent = '分析不可用：' + e.message;
+    el.classList.remove('streaming');
+  } finally {
+    S.chatBusy = false; $('btnSend').disabled = false;
+    if (el.classList.contains('streaming')) el.classList.remove('streaming');
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+}
+$('chipAnalyze').onclick = () => analyzeWindow(60);
+
+/* ───────── 交互：基准 ───────── */
+$('btnBench').onclick = async () => {
+  const btn = $('btnBench');
+  btn.disabled = true; btn.textContent = '测量中…';
+  try {
+    const r = await fetch('/api/bench', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: '{}'});
+    const d = await r.json();
+    const lines = (d.runs || []).map(x => x.ok
+      ? x.case + ': ' + x.wall_s + 's · ' + x.tok_s + ' tok/s · "' + (x.text || '').slice(0, 40) + '"'
+      : x.case + ': 失败 ' + (x.error || ''));
+    sysMsg('基准实测（3 条用例）\n' + lines.join('\n') + '\n中位 ' + (d.median_tok_s ?? 'N/A') + ' tok/s');
+    toast('基准完成 · 中位 ' + (d.median_tok_s ?? 'N/A') + ' tok/s', 'ok');
+  } catch (e) {
+    toast('基准失败：' + e.message, 'bad');
+  } finally {
+    btn.disabled = false; btn.textContent = '跑 3 条基准';
+  }
+};
+
+/* ───────── 启动 ───────── */
+(async function boot(){
+  // 优先取服务端 state（含最新构建），失败则用内嵌
+  if (location.protocol.startsWith('http')) {
+    try {
+      const r = await fetch('/api/state', {cache: 'no-store'});
+      if (r.ok) STATE = await r.json();
+    } catch (e) {}
+  }
+  renderStatic();
+  renderKpis(); renderCharts(); renderEvents();
+  renderPills({}); updateTopo({});
+  loadTopology();
+  const rs = $('topoRescan');
+  if (rs) rs.onclick = () => loadTopology(true);
+  if (!location.search.includes('nostream')) mountAll();
+  if (!location.search.includes('nolive')) connect();
+  sysMsg('已连接控制台。左：RV1126B 实时 MJPEG；右：昇腾盒子流式 LLM；下方为实测指标与归档关键帧。');
+})();
+</script>
+</body>
+</html>

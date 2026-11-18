@@ -1,0 +1,1469 @@
+{
+  "name": "heterogeneous-course-kit-v1.0",
+  "generated_at": "2026-11-18T19:57:05+08:00",
+  "source": "互联异构计算课程材料平台（Mac 控制台 + 昇腾 LLM + RK3588 + RV1126B）",
+  "copied_items": 314,
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 1156,
+      "sha256": "b37cf6eeecb50c459b2ba97e74ee06302e55da14851287f48ba1f786f80e5fa8"
+    },
+    {
+      "path": "ARCHIVE_NOTICE.md",
+      "bytes": 1489,
+      "sha256": "5cbe08a432da05d21f85339e01ace7853c5a022d9498017ca70450942620deac"
+    },
+    {
+      "path": "Benchmark实验设置手册_V1.1（实机版）.docx",
+      "bytes": 32090,
+      "sha256": "9003a6994d3f0de517cbbeabd3cfa93a578ab32509cae3ae3923765599d54cb7"
+    },
+    {
+      "path": "Makefile",
+      "bytes": 1365,
+      "sha256": "88965a990e2c1da2b343951a1403ec23a470eb3075437753489323ea5d73355e"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5065,
+      "sha256": "f0b8ed3a83bdd318f1e5fef1c93af1ef54a284fc78aef35dcbe47fa6f5896153"
+    },
+    {
+      "path": "TC1-C非制冷红外热成像模组产品说明书-V1.7-20240617(1).pdf",
+      "bytes": 830994,
+      "sha256": "3ec5fec038ae8c1f23ce4ada4ef38c8762b03d64916fc096ec69b8c197508fd0"
+    },
+    {
+      "path": "ascend_probe.txt",
+      "bytes": 1877,
+      "sha256": "b25d97c97db4e9ac4d32d53597e41d1980eba1be863b80ae362253ea567812dc"
+    },
+    {
+      "path": "config/lab.env.example",
+      "bytes": 1305,
+      "sha256": "39244a7b9f3f89e55a522f6dbecb156f599d576ae9337def82ff886ef05132dd"
+    },
+    {
+      "path": "docs/01-environment.md",
+      "bytes": 5242,
+      "sha256": "862345e321855ba00c57dd0c4c51593449771404564593237a1279afdd04b985"
+    },
+    {
+      "path": "docs/02-deployment.md",
+      "bytes": 5236,
+      "sha256": "e9cccbe8e77c80bec759156f50d217a2dbaa9871459dc2798af46922a87f7d81"
+    },
+    {
+      "path": "docs/03-user-guide.md",
+      "bytes": 6343,
+      "sha256": "6ccd84fe6e61a4db0d56afcc63dd0249e57ecd706df87053c9c872440b52a44b"
+    },
+    {
+      "path": "docs/04-principles.md",
+      "bytes": 6681,
+      "sha256": "276618a58b16bba45e81d97ed8e6c8520b00da7942fda404cb06201855266e9f"
+    },
+    {
+      "path": "docs/05-course-map.md",
+      "bytes": 6732,
+      "sha256": "1dc6c610d4369a2e25ea51887eace96ad25c660aceb055b6daf3e58aa17cb89f"
+    },
+    {
+      "path": "docs/06-reproduce-and-verify.md",
+      "bytes": 4041,
+      "sha256": "e66acdf45f4ee3570f20688f16cda2614767bde934ac4bbd500efaebe6f1c5fe"
+    },
+    {
+      "path": "docs/07-troubleshooting.md",
+      "bytes": 5260,
+      "sha256": "e7dd5d3eed15e8f30cdf774299abad5ff3d6d735507a74aad21cf25a3760d7a6"
+    },
+    {
+      "path": "eval_platform/config/camera_binding.yaml",
+      "bytes": 4364,
+      "sha256": "9ee2a06399f8638bd1c3a90acf780781e716465f8e2eff82754d34869891454a"
+    },
+    {
+      "path": "eval_platform/config/heterogeneous_setup.yaml",
+      "bytes": 24490,
+      "sha256": "07f8a072e5224519eedc764c20f4d5c4ffc22edd39c262546902fdbb71954c8f"
+    },
+    {
+      "path": "eval_platform/config/lab_config.py",
+      "bytes": 2595,
+      "sha256": "7af3c382a777e9c9d98214faf07454bd8232d20ba5cc1b09a72947a8aee665b4"
+    },
+    {
+      "path": "eval_platform/dashboard/build_g4_dashboard.py",
+      "bytes": 16326,
+      "sha256": "aed495d16c220f72bf804e9f89a6a92f62c01f8f856e248502e967d37c520c69"
+    },
+    {
+      "path": "eval_platform/dashboard/camera_stream.py",
+      "bytes": 22675,
+      "sha256": "9c137479aa3de54b64c1746c6b258a1216b5929f36e77b81896a0e15555907e7"
+    },
+    {
+      "path": "eval_platform/dashboard/data.json",
+      "bytes": 535956,
+      "sha256": "dbb4226acfe7003ad87c42254e008f98d3a197d4835dd7091e7a9b8747cec905"
+    },
+    {
+      "path": "eval_platform/dashboard/g4_live.html",
+      "bytes": 108672,
+      "sha256": "a1d2d470648a5742a2213c72fa0735b123a8c12d7d36cacd097ce3eb1fe7b801"
+    },
+    {
+      "path": "eval_platform/dashboard/g4_live.template.html",
+      "bytes": 94167,
+      "sha256": "0ab91e28048ec377c8d7d7cc4ce948610d90e10e04c9b7764096b658cd3a6093"
+    },
+    {
+      "path": "eval_platform/dashboard/g4_state.json",
+      "bytes": 15433,
+      "sha256": "7247d983cda2e3d92ccfd24f96c98df18a200fe982f7bd06c5cfe04f461e706f"
+    },
+    {
+      "path": "eval_platform/dashboard/index.html",
+      "bytes": 529813,
+      "sha256": "20ad9bb319c05ca03747c50a8a9002735f2ea5bed2af184181cfcb88d98a9bcf"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/demo_stat.txt",
+      "bytes": 1859,
+      "sha256": "24d04ffb2dc614dec5ae64ff71fc506904f68c7827c123809e894b126c5872ac"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224914_889_ir.jpg",
+      "bytes": 12641,
+      "sha256": "4c7b6af6cf2ca7964c32be6e7b914e60a28a5206c4a84264d8b5240157b8b66b"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224914_889_vis.jpg",
+      "bytes": 57977,
+      "sha256": "dd1e6ffe2a882d92e0ea455521fdcf7dd01f52418a248b74dedf52178e6ed4d3"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224915_968_ir.jpg",
+      "bytes": 12901,
+      "sha256": "b7e77fff8e7230a8a61e2ef814849e58a9a72a65477a9a451a9ef26a8922491d"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224915_968_vis.jpg",
+      "bytes": 61455,
+      "sha256": "447a2c2849fe595882c0cd3624e49f74f4ff3881a98147e53be873f5b43b819f"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224916_064_ir.jpg",
+      "bytes": 12816,
+      "sha256": "9ff59478e4348323e55ea5c1f8e1431d1621337e5a9bb87eb5c828fbe4ab0a5c"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224916_064_vis.jpg",
+      "bytes": 58091,
+      "sha256": "5af01339553628ebfe5f4c663817de86f718a236f2ae05efc3373031b2c39141"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224916_158_ir.jpg",
+      "bytes": 12538,
+      "sha256": "ee24fef6d8de8f132aa70830957f15df440a48b40dc055e44747d29747364a41"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/det_20261012_224916_158_vis.jpg",
+      "bytes": 57515,
+      "sha256": "f06989851eb3eba6f8b4fd7664d05a18bbf130ee6d9f5320a9b91670c07580e7"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/events_ai.jsonl",
+      "bytes": 26319,
+      "sha256": "5dd2cda5e05af7159c2112a8f1b994400ec57a8010563f214321aed1ccccdb52"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/live_20261116_162901_vis.jpg",
+      "bytes": 80428,
+      "sha256": "2ecf453a7b84f9116f81dd50c98619e2ed51147038439f3020dcfb67c5151943"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/live_20261118_154504_vis.jpg",
+      "bytes": 78150,
+      "sha256": "f0a76e5993fe143c87a771ecbf8c54d9aed48da58e868aeb844ce720c110538a"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/live_20261118_154801_vis.jpg",
+      "bytes": 78578,
+      "sha256": "87cfb19421007116591cb2ed09fb33c56b4c24176908cd05cca4dcf5015f4b6a"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224914_889_ir.jpg",
+      "bytes": 28243,
+      "sha256": "f7248538d04376324549a95c7321073119ec68500d5ecf8c18df4237e03a7965"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224914_889_vis.jpg",
+      "bytes": 32901,
+      "sha256": "0863e34cddcc6a9c907665eefe09f8733a1eb70bc6fb3c6c1ba22c838dd22121"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224915_968_ir.jpg",
+      "bytes": 28973,
+      "sha256": "483ba5ad532a56c03e13da230f8b8018f6969166360a1fd339ad6607ec90560d"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224915_968_vis.jpg",
+      "bytes": 34753,
+      "sha256": "4b40f0564372b98583535a6b0b3ae9dd0b092df222b79242a526caa86bb0ec92"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224916_064_ir.jpg",
+      "bytes": 28521,
+      "sha256": "c9ded47bd204eb7a1f3d28cff65ae440574796e611b49a95399efe9be00c018d"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224916_064_vis.jpg",
+      "bytes": 33324,
+      "sha256": "562fc15b9d459736e433e641404b907d3fe6537a298cbd75e136bb8e2f0110d2"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224916_158_ir.jpg",
+      "bytes": 28151,
+      "sha256": "d80208758654b153ee1c86d2af7c02b24f1ce9831328d4256778e8ad5409929f"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_det_20261012_224916_158_vis.jpg",
+      "bytes": 32718,
+      "sha256": "3231056d88c7257e67fbabb290c4a4f053d3c7d1341e862661e6a6fa4d3b3cb1"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/sm_viz_20261012_224915_849.jpg",
+      "bytes": 115994,
+      "sha256": "a929780777ecab74d7c9dcf68a43688a09c90b9bca871fa72add137363773e48"
+    },
+    {
+      "path": "eval_platform/dashboard/samples/viz_20261012_224915_849.jpg",
+      "bytes": 335882,
+      "sha256": "c0451c8cbac6ba58502abca887f75981ee6870a611eed81a460c002e3f416271"
+    },
+    {
+      "path": "eval_platform/dashboard/serve.py",
+      "bytes": 3151,
+      "sha256": "c20fa5bf9d0a066f5eee81cd0a889c5b69d182904664e8cc87bab678dda665f1"
+    },
+    {
+      "path": "eval_platform/dashboard/serve_g4.py",
+      "bytes": 84003,
+      "sha256": "aae02d4eb9d5a6dba02b839a9cf2b66c96f615a7d286cc9048351f7a2b79eb14"
+    },
+    {
+      "path": "eval_platform/dashboard/topology_live.json",
+      "bytes": 18370,
+      "sha256": "45834e872ed7fb15af2f5c6ad34f1dd42b99427e0cff9bd6dba22f5248ac9852"
+    },
+    {
+      "path": "eval_platform/dashboard/update_backend.py",
+      "bytes": 3453,
+      "sha256": "b9443484ade596a4bc0dad58cf226be2b1729cd7ac27e578f76652dbff8b2707"
+    },
+    {
+      "path": "eval_platform/dashboard/update_cu.py",
+      "bytes": 2162,
+      "sha256": "90a977a97222f240c2c13dbd631b798d2476623dd87a914ba45bfbab43315db3"
+    },
+    {
+      "path": "eval_platform/dashboard/update_g3.py",
+      "bytes": 9206,
+      "sha256": "a3ab49c1d33ff645a66005cb8acf3967fe49497bbecf58266c08e751eedceeab"
+    },
+    {
+      "path": "eval_platform/dashboard/update_ort.py",
+      "bytes": 2324,
+      "sha256": "df83377e57e596a28fff6884061e33ccb306fb9dfa03c1b93b21350f819d8e3f"
+    },
+    {
+      "path": "eval_platform/dashboard/update_perf.py",
+      "bytes": 2351,
+      "sha256": "790e2398d6e8073467eae84cfbb652783787c39f9816a6a08808d09fb8bb6fe7"
+    },
+    {
+      "path": "eval_platform/dashboard/update_resnet.py",
+      "bytes": 1881,
+      "sha256": "b729ff7b139ff74e52c9ac8c3e95220118d16557f27050934842056a273f7d93"
+    },
+    {
+      "path": "eval_platform/llm/Modelfile",
+      "bytes": 1395,
+      "sha256": "823eef7b017eb23295167abc219321d03714e0c0d5b824ee0081097b69cb3fc6"
+    },
+    {
+      "path": "eval_platform/llm/bench_llm.py",
+      "bytes": 4237,
+      "sha256": "ceb13315405c37441f0ace343108cbaed707e71ced1642bdbfba130df373434c"
+    },
+    {
+      "path": "eval_platform/llm/build_keyframes.py",
+      "bytes": 10614,
+      "sha256": "6a6b25a0a8926fc786324611aeb4eea9749072423d4f1451b32915d739088b84"
+    },
+    {
+      "path": "eval_platform/llm/llm_bench.json",
+      "bytes": 2575,
+      "sha256": "e98ed16b5f4a3923330f42c5459f84c2b12ce7f56abd12c7ddf9df0360008358"
+    },
+    {
+      "path": "eval_platform/llm/llm_bench_ascend.json",
+      "bytes": 1619,
+      "sha256": "3c5cab02f91c3ea2578bc0c3c582a21cc30315434d19502c1e1669f4363b5533"
+    },
+    {
+      "path": "eval_platform/llm/serve_lan.sh",
+      "bytes": 1200,
+      "sha256": "68765b1eafe83d7b1b33a9882c1ab9ba6e00d483888025652480624dacad1bce"
+    },
+    {
+      "path": "eval_platform/runs/20261105T190201Z_G3_interconnect_heterogeneous/manifest.json",
+      "bytes": 269,
+      "sha256": "2eb7571d5c4f2889c3149aad5c3013f3d633c9cd787d98cc1976f8bcfcae65e4"
+    },
+    {
+      "path": "eval_platform/runs/20261105T190201Z_G3_interconnect_heterogeneous/report.md",
+      "bytes": 9606,
+      "sha256": "69836a49c7345cf5fc6b8579d76751c4c8f5c72807d183f5b84b0cd23861d93b"
+    },
+    {
+      "path": "eval_platform/runs/20261105T190201Z_G3_interconnect_heterogeneous/summary.json",
+      "bytes": 914,
+      "sha256": "da86e278e483ac1e94a3fea46b62a9fbff64981e124f4aea5a448b16933fa656"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/ascend_box_probe.md",
+      "bytes": 7522,
+      "sha256": "0791db4a12b444c4c832f0c6e066b763e684f814bbb1c989712df2f4fe069ac3"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/ascend_box_spec_report.md",
+      "bytes": 8962,
+      "sha256": "b01c07c4cfd7742b7803203ffd30edfeb037fb884ef1501e6cbf81cbe78c082f"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/checksums.sha256",
+      "bytes": 1142,
+      "sha256": "c1d7ac5f9536900d437b135574cacdba1c436dcb83cb73fcc93ba9a8727b2779"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/keyframes.json",
+      "bytes": 6979,
+      "sha256": "738a3000c4771beb44e42c98a0a8fc5ba1570e80c9d78cca5e8cc015703a503a"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/keyframes_ascend.json",
+      "bytes": 7999,
+      "sha256": "478f08b259c907fdc951d02cb413779cc2096e61ff9973825c3b724b211f3c75"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/manifest.json",
+      "bytes": 4770,
+      "sha256": "8b61897845adecad1154580fb95132bbf0a6822b88e2f28ce546fbcce0572cdc"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/network_topology_snapshot.md",
+      "bytes": 28012,
+      "sha256": "48004985d14aeefa6fd08beebc5db869da7aa2f9525306461e486460cbb66159"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/npu_attempt.md",
+      "bytes": 7506,
+      "sha256": "2bb4cad7adb6e70f7912bd145c7c84cc563d8a244877cf0213ed34fef5050ebe"
+    },
+    {
+      "path": "eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/report.md",
+      "bytes": 22443,
+      "sha256": "816eea3966dd277d2abc849a500a426a47eeb19ce7178fff680527dcc10c28d6"
+    },
+    {
+      "path": "eval_platform/tools/ascend_llm_service.sh",
+      "bytes": 2381,
+      "sha256": "974180323b6aaecfcb568ef6e24223e9136a46c7ca8e5d412be1bec7b6716111"
+    },
+    {
+      "path": "eval_platform/tools/bench_llm_ascend.py",
+      "bytes": 5056,
+      "sha256": "26b8520679875d6bb7ed811db30312ea3fbc55799eed81bba81ce74a36dd797b"
+    },
+    {
+      "path": "eval_platform/tools/build_edge_detectors.sh",
+      "bytes": 2706,
+      "sha256": "a68cce1d68c250daf3c3d607a6e4b631463cee9fc42ba6e085dca90256f6447e"
+    },
+    {
+      "path": "eval_platform/tools/build_keyframes_ascend.py",
+      "bytes": 4861,
+      "sha256": "0c3ddbcd9d88d3972bf71a9a79b12c068ebcf172fb5ac25498a5a061b83bcd52"
+    },
+    {
+      "path": "eval_platform/tools/build_llama_cann.sh",
+      "bytes": 1943,
+      "sha256": "4223776331915c128ac059cc045e66528716297610277a4b6af9f1191b93998b"
+    },
+    {
+      "path": "eval_platform/tools/check_ir_module.sh",
+      "bytes": 5645,
+      "sha256": "2b43a6a30731e00a5840dd9c56aa2e0c6e46c9795770c2dbf49f75f76d1d6b73"
+    },
+    {
+      "path": "eval_platform/tools/check_lab_network.py",
+      "bytes": 4595,
+      "sha256": "ab8b15214c161404e721097d48386c3c9901e6ecee86b60e448a4ded04927aba"
+    },
+    {
+      "path": "eval_platform/tools/collect_inventory.py",
+      "bytes": 4301,
+      "sha256": "08b55214a4c0ebc3e0b953f6c89354c07e32512b30112773d680fcd3df111a01"
+    },
+    {
+      "path": "eval_platform/tools/collect_inventory_rv1126b.py",
+      "bytes": 5418,
+      "sha256": "eb1d65dd6de7d6e953bc1ebd52b386312aeee50b7b20b113361b441b51700fda"
+    },
+    {
+      "path": "eval_platform/tools/convert_resnet50.py",
+      "bytes": 1103,
+      "sha256": "717a02d58593d9bc0da199b96556e0d998f2d43a917ae6109a7b63303dfc2558"
+    },
+    {
+      "path": "eval_platform/tools/disable_rk_proxy_arp.sh",
+      "bytes": 2863,
+      "sha256": "39d78629d621a2825c35ababac1a5ac3a77da34e1d1aa17e7843b3f587c7729a"
+    },
+    {
+      "path": "eval_platform/tools/discover_lab_devices.py",
+      "bytes": 7367,
+      "sha256": "ec288258457538c7f93f25cfa03eb47cea4589a9fcc703cbee45458741b0138a"
+    },
+    {
+      "path": "eval_platform/tools/discover_topology.py",
+      "bytes": 34274,
+      "sha256": "534eab2726fd1622f5dca478972f5c27dc64d3cee808c97f0ceae77e3d8358b2"
+    },
+    {
+      "path": "eval_platform/tools/dnn_bench.cpp",
+      "bytes": 2053,
+      "sha256": "46084252f0b08b90333da01591bdee87817c1711a1c1b3f89eb282de2589b4ce"
+    },
+    {
+      "path": "eval_platform/tools/evidence_sender.py",
+      "bytes": 9449,
+      "sha256": "fab260a56f0deec0bb175e1a960b1239878d8d58f1308f9de943cde0e10cb5bb"
+    },
+    {
+      "path": "eval_platform/tools/evidence_server.py",
+      "bytes": 11326,
+      "sha256": "8af47d106ab330004d0013f8edca3eccb8025fc1288d970d209e70f315171077"
+    },
+    {
+      "path": "eval_platform/tools/finalize_lab_setup.sh",
+      "bytes": 3673,
+      "sha256": "119d59fd224303df8483d663b0ad449c19ccc3ad104b4005fda5e609bc12cfbf"
+    },
+    {
+      "path": "eval_platform/tools/g4_guard.py",
+      "bytes": 19544,
+      "sha256": "e93e9be423141796a48478103966c9d213d4b21e382f07dfa461527b41bab07a"
+    },
+    {
+      "path": "eval_platform/tools/infer_bench.cpp",
+      "bytes": 3399,
+      "sha256": "7f82d2a3ce2482e2955959983c56d5560bc4c86872b890db1bb64019e975d6a2"
+    },
+    {
+      "path": "eval_platform/tools/ir_detect.cpp",
+      "bytes": 11001,
+      "sha256": "e56a6a539e08193cf785c712d171df2db63cfd1f3657be3e3d8c5058c682fb32"
+    },
+    {
+      "path": "eval_platform/tools/link_bench.py",
+      "bytes": 1449,
+      "sha256": "a63c29bef67e03cdfa5a8217093415bd65fd629b7b8019d0b20a16846ff9f357"
+    },
+    {
+      "path": "eval_platform/tools/node_roster.py",
+      "bytes": 4030,
+      "sha256": "e23c8a3611541b7ff179c547f16ed8fd0a2af44768013b1900935b62536dd43e"
+    },
+    {
+      "path": "eval_platform/tools/ort_test.py",
+      "bytes": 1591,
+      "sha256": "5551290bd1660bb6ee1be45626d1f1c2742c65ae1d8a77c19a75a16658551100"
+    },
+    {
+      "path": "eval_platform/tools/patch_camera_stream_ir.py",
+      "bytes": 5696,
+      "sha256": "279be9844c0f1a8c30871ca5212bb4a44e181a341371619e39eab3301275f20e"
+    },
+    {
+      "path": "eval_platform/tools/persist_ascend_lab_ip.sh",
+      "bytes": 1866,
+      "sha256": "1e0572a8efe981621fda0d4faf0f70857ae00a2043f80ef85eceff2b232f4073"
+    },
+    {
+      "path": "eval_platform/tools/probe_ascend_box.sh",
+      "bytes": 5427,
+      "sha256": "8f8f888a521a766e8b8eaeabc1be0b16fda7ddd06fcb7bd534a473247ca637b6"
+    },
+    {
+      "path": "eval_platform/tools/probe_link.py",
+      "bytes": 3931,
+      "sha256": "93f78455d3799ec54e0ab91a4076b1f1f12d3f812e99a717a8da4bc00a969c7d"
+    },
+    {
+      "path": "eval_platform/tools/recheck_lab_link.sh",
+      "bytes": 4677,
+      "sha256": "4a730d8a520ae42d04fd9e3c388204a0eb5decfa129239291f578e8523435742"
+    },
+    {
+      "path": "eval_platform/tools/rk_llm_reconfirm.py",
+      "bytes": 5205,
+      "sha256": "d010cb7857f0b328b242ab52979b44a06606ad613edef5a7888c832c50a85a39"
+    },
+    {
+      "path": "eval_platform/tools/rknn_convert.Dockerfile",
+      "bytes": 963,
+      "sha256": "174a2d4933bff5e33a032ac746f82685fd5f25c1426e54068635487d5e069e8a"
+    },
+    {
+      "path": "eval_platform/tools/rotate_ir_ccw90.py",
+      "bytes": 6675,
+      "sha256": "ca057d65c98f87f86a9c58963827c14f5ea4acbd049252f58d349ebcb9b47ee3"
+    },
+    {
+      "path": "eval_platform/tools/run_g4_pipeline.sh",
+      "bytes": 3691,
+      "sha256": "64f8273c19a477cecb3c21ab1a10a88f77f307ad4a5d6019acf6872356e0d3d5"
+    },
+    {
+      "path": "eval_platform/tools/setup_rk_bridge.sh",
+      "bytes": 1285,
+      "sha256": "f2af38358a087e5abb0c456e360c114589b80e9cbf1c7b1ec8d5af96ca69c3b4"
+    },
+    {
+      "path": "eval_platform/tools/setup_rk_bridge_ip.sh",
+      "bytes": 1143,
+      "sha256": "019f37153aa73e8b33623b07696edc6a1d2722fb739fe105f61a7bacd13d5339"
+    },
+    {
+      "path": "eval_platform/tools/setup_rk_forward.sh",
+      "bytes": 1509,
+      "sha256": "f7ef7970e6cf5d8272190b367e507e655b4502ba2b974b64e94e174a4ff40424"
+    },
+    {
+      "path": "eval_platform/tools/setup_rk_forward_v2.sh",
+      "bytes": 1657,
+      "sha256": "88506d7aa6a8a6ec58a6c32849f812d204e6aa7e4f283c103946f61f25d4beb7"
+    },
+    {
+      "path": "eval_platform/tools/start_dashboard.sh",
+      "bytes": 1159,
+      "sha256": "580d1803644b163a21f37730319a2e77649abebb92152c76e479aef11c002da8"
+    },
+    {
+      "path": "eval_platform/tools/tcp_bench.py",
+      "bytes": 2917,
+      "sha256": "c9277c88752bb892cca6e77c58f3e6f7f2b7221b2f25d3282014235348fdefeb"
+    },
+    {
+      "path": "eval_platform/tools/test_npu_hybrid.sh",
+      "bytes": 3091,
+      "sha256": "ca6c30b6be4633dcc70056fa0abcba258ac4324559543ae0a653f268365439c3"
+    },
+    {
+      "path": "eval_platform/tools/yolo_live.cpp",
+      "bytes": 7513,
+      "sha256": "b45be597946fe89bfd69e41f1be18bc148a148523087a8ddb21d1ea7e089dad2"
+    },
+    {
+      "path": "requirements-ml.txt",
+      "bytes": 495,
+      "sha256": "cbd9faee8341946c8f75a040e8a0be99634b3abcd68ef1171883a4e41f02f9c3"
+    },
+    {
+      "path": "requirements.txt",
+      "bytes": 419,
+      "sha256": "811017fe10a35928f6ea5e092df5b9f758bb889cd8684d5a3b631533191868dd"
+    },
+    {
+      "path": "rv1126_test/CMakeLists.txt",
+      "bytes": 1756,
+      "sha256": "38c349100f15e087fedfd5002f9f99299bdaf006414614d4f0d3104ddd3a26f1"
+    },
+    {
+      "path": "rv1126_test/RV1126B双光差分显著+YOLO级联Demo实现方案.md",
+      "bytes": 57280,
+      "sha256": "d0a08a155dac3ddd3165edcc3a54d7396764b4d4e151660e81b1cc0fe19625bc"
+    },
+    {
+      "path": "rv1126_test/SSH板端初始化配置.md",
+      "bytes": 4841,
+      "sha256": "b37bc5e343779857262d82424c30a2a1aa9369b851cef624bec45fc0c1b7b8a8"
+    },
+    {
+      "path": "rv1126_test/USB带宽约束分析.md",
+      "bytes": 15657,
+      "sha256": "c93fa8ba940f24530a8c3e775d779de994690446caf8981c3b091e2bcb89fa0c"
+    },
+    {
+      "path": "rv1126_test/build.sh",
+      "bytes": 920,
+      "sha256": "a0d323fc59767c497d8e3bbb0f03cafe703f64e95427361c304f3a9705bceb1b"
+    },
+    {
+      "path": "rv1126_test/deploy.sh",
+      "bytes": 916,
+      "sha256": "55850238a509aed82e1e3ff5a346eb010772a4c60f9858a8c232c0fe78657cda"
+    },
+    {
+      "path": "rv1126_test/dual_demo/CMakeLists.txt",
+      "bytes": 1744,
+      "sha256": "219ffda7edb1c5c0ef891165be28dd4e8ccc673644dab1cddd6481d6d38add57"
+    },
+    {
+      "path": "rv1126_test/dual_demo/README.md",
+      "bytes": 3001,
+      "sha256": "744fe868d29d037980fba9ee81a8eb9da2550fec19580090625b5707d45c844f"
+    },
+    {
+      "path": "rv1126_test/dual_demo/build.sh",
+      "bytes": 920,
+      "sha256": "a0d323fc59767c497d8e3bbb0f03cafe703f64e95427361c304f3a9705bceb1b"
+    },
+    {
+      "path": "rv1126_test/dual_demo/calibration.txt",
+      "bytes": 488,
+      "sha256": "ee86ad13551f9083c90eb9068e885e8cf861aa278543659e14ac65a15d918715"
+    },
+    {
+      "path": "rv1126_test/dual_demo/deploy.sh",
+      "bytes": 914,
+      "sha256": "110225ea3613d5773369d43abfbfdebbd9be2fda37adc2232645d882d68c173d"
+    },
+    {
+      "path": "rv1126_test/dual_demo/docs/ir_temp_probe_report.md",
+      "bytes": 2849,
+      "sha256": "29b0a0fcc5ff03047d1ca7add4aac10cc62159208de6232c78c8d42c7d2e0c95"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/eventlog.h",
+      "bytes": 827,
+      "sha256": "e0a5f54ff1db86bb970438f451de5b1294a4b74870c9ef0b9a374ce9c25e2444"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/file_utils.h",
+      "bytes": 1089,
+      "sha256": "3cee0b6094f0d0fab21c65d26b406c0a1e636dd465daf1d90b934ba85545482b"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/frame.h",
+      "bytes": 4204,
+      "sha256": "d55b95312a5f1346c794433bb0b48fb2f625f2c651b959432f6c3ffea9bdafff"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_camera.h",
+      "bytes": 2402,
+      "sha256": "4b589888e9731a667f833e6636f1adad677008e62b8629ab12665bcb241d0faf"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_sdk/all_config.h",
+      "bytes": 3893,
+      "sha256": "eab2f4427ff6aa75dc66f4f13b11c9c844843abb4662f4e963c0f80a47e41ed6"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_sdk/falcon_cmd.h",
+      "bytes": 40184,
+      "sha256": "cecb951c338a1e06554eaf6cfc0e2e7b63e87638ee7fd4c7bf5357b7568d5735"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_sdk/libirparse.h",
+      "bytes": 5967,
+      "sha256": "d59bedda307b406f60207f1d2719034d9924085378adc7b611ed64d6af2fc412"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_sdk/libirprocess.h",
+      "bytes": 11168,
+      "sha256": "c5d18309994738477bd1a87c713c36ab99f15f24fb7ed78b89c85020b53948c6"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_sdk/libiruvc.h",
+      "bytes": 6795,
+      "sha256": "989906b554aa552f2c158b234863b2e098f6f7378e7f4671af5635fca48ae277"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/ir_temp_conf.h",
+      "bytes": 1320,
+      "sha256": "b2c13f3244192f6bd88a30d351d75c8b83721fb4d195ab2d0b8acad9bb115824"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/mjpeg_decoder.h",
+      "bytes": 217,
+      "sha256": "4ea8b54f8948d944598f798a860fd002a9442b7e549a6ee36cef4657d08fb920"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/mjpeg_huffman_tables.h",
+      "bytes": 4763,
+      "sha256": "225e066ea66474dc8a1bd9fad4d54d31879454420758c278431dd98c94835aba"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/nomination.h",
+      "bytes": 2761,
+      "sha256": "545ce127b40f3536a037f6bbed333a09396c0711e59b41b2de391e2d49b791af"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/nominator.h",
+      "bytes": 4879,
+      "sha256": "7b8b99322d4d915d088ae5ab53baf55fe631209adce09fdde2c641591c48decf"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/perf_clock.h",
+      "bytes": 289,
+      "sha256": "ddfba3160d53e9bd04d513633f9b1d6d09bfa3783c9275699fddd390a6e64fb6"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/postprocess.h",
+      "bytes": 913,
+      "sha256": "2055772a981c1692cf189232dc1614f91530490142f2ab2799fca7ff1f222af7"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/registration.h",
+      "bytes": 2693,
+      "sha256": "1a38b30a19c09dc46dfede10c621104afe0da0c61993f418fbb8c621059bcd0f"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/rknn_api.h",
+      "bytes": 30381,
+      "sha256": "61eedea2dd0fed8e4ee667fef571bf6b07fc87495bb6282d65055f60c61e7079"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/saliency.h",
+      "bytes": 2737,
+      "sha256": "7f23ec3110992834d4ad0271b55e64e23e6bad518b4621cb63742d503eca643a"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/visible_camera.h",
+      "bytes": 2240,
+      "sha256": "c2c482373429bf9edc412d957ad841781aa5542da9f55c401c8fe0c47c4930ef"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/viz_grid.h",
+      "bytes": 1802,
+      "sha256": "5e4ab15d247601bc3bcc60788c7363392b4e503d59f8a1ba4f804cd1a18e62dc"
+    },
+    {
+      "path": "rv1126_test/dual_demo/include/yolov8.h",
+      "bytes": 1439,
+      "sha256": "acd2694bf63720ec91bb8444c5b3655b32abae33ebfdc8d8e5b4a9ae9752e6b4"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/eventlog.cpp",
+      "bytes": 4136,
+      "sha256": "7275130bcffd3333cf4c79435388d54252acb7ac391d55f3a3d8747dd440faec"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/file_utils.cpp",
+      "bytes": 2779,
+      "sha256": "5db83ccf9b175cd1cf544f3ee00010fe0bdf0a73f31000be51cf0fb66dd44cd2"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/ir_camera.cpp",
+      "bytes": 11136,
+      "sha256": "a6e56c6c281cd2a5ead1f3bb79be68ceb40dc0e3a6bb67c3bebcf723acafdae6"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/mjpeg_decoder.cpp",
+      "bytes": 2506,
+      "sha256": "6a89499a05001cd00faff51cf91a06c45aaedd8a158dbd08279c941a9060e276"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/nominator.cpp",
+      "bytes": 12645,
+      "sha256": "ad1252392d6ed12e08fd8e8aabdea778bdd96c401d9d34a8cb5b252dfa6fbc22"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/registration.cpp",
+      "bytes": 8948,
+      "sha256": "5772fcc9c99e29aa01004ef356ba98104569d8d50d9ab84f4d1e7045b200c33e"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/saliency.cpp",
+      "bytes": 10245,
+      "sha256": "620452894d6b9e097a7ed856d1a5f85c3af7713d5d34d79c8f557718ab45d7c7"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/visible_camera.cpp",
+      "bytes": 18138,
+      "sha256": "81ffad35747fbb4652fa71f6f0099f578243504e5d369254205ec2897d4071ac"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/viz_grid.cpp",
+      "bytes": 6273,
+      "sha256": "5cea56e42815522f22a4a3129262a22f5ddb0238c5b792e2c8f399b9c1a14f8b"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/yolov8.cpp",
+      "bytes": 10399,
+      "sha256": "32d264adc2302d167b4faff0bbbdfc5247cc1d5525200167be915b65ad695046"
+    },
+    {
+      "path": "rv1126_test/dual_demo/lib/yolov8_postprocess.cpp",
+      "bytes": 21111,
+      "sha256": "3ee8e038157306037cb3f5e5d700ba2cc715331abad4941dbe588763af50b1ff"
+    },
+    {
+      "path": "rv1126_test/dual_demo/libs/arm64/libusb-1.0.so.0",
+      "bytes": 145392,
+      "sha256": "724a2e4b1b1b47e8df2cae0e937d9635b8a65a604cfa891e630463f377a9c16c"
+    },
+    {
+      "path": "rv1126_test/dual_demo/main.cpp",
+      "bytes": 51698,
+      "sha256": "8a51115424732c783133782270d6538f6339d701434d000f78156d199b4b748d"
+    },
+    {
+      "path": "rv1126_test/dual_demo/run.sh",
+      "bytes": 3601,
+      "sha256": "785ab6491a6b2768b2b6faa3d8252182093f9d2210356ca2abaca549ae7e32f9"
+    },
+    {
+      "path": "rv1126_test/include/file_utils.h",
+      "bytes": 1089,
+      "sha256": "3cee0b6094f0d0fab21c65d26b406c0a1e636dd465daf1d90b934ba85545482b"
+    },
+    {
+      "path": "rv1126_test/include/frame.h",
+      "bytes": 3476,
+      "sha256": "354d8c7e8e8539ed2d9f0b8118d3c7c834d44744aad11851a44037cccacbfb66"
+    },
+    {
+      "path": "rv1126_test/include/ir_camera.h",
+      "bytes": 1901,
+      "sha256": "ec9c48f08ea76bee07db78fcf267f8b52f1afac453573afdb3d5675bba560df4"
+    },
+    {
+      "path": "rv1126_test/include/ir_sdk/all_config.h",
+      "bytes": 3893,
+      "sha256": "eab2f4427ff6aa75dc66f4f13b11c9c844843abb4662f4e963c0f80a47e41ed6"
+    },
+    {
+      "path": "rv1126_test/include/ir_sdk/falcon_cmd.h",
+      "bytes": 40184,
+      "sha256": "cecb951c338a1e06554eaf6cfc0e2e7b63e87638ee7fd4c7bf5357b7568d5735"
+    },
+    {
+      "path": "rv1126_test/include/ir_sdk/libirparse.h",
+      "bytes": 5967,
+      "sha256": "d59bedda307b406f60207f1d2719034d9924085378adc7b611ed64d6af2fc412"
+    },
+    {
+      "path": "rv1126_test/include/ir_sdk/libirprocess.h",
+      "bytes": 11168,
+      "sha256": "c5d18309994738477bd1a87c713c36ab99f15f24fb7ed78b89c85020b53948c6"
+    },
+    {
+      "path": "rv1126_test/include/ir_sdk/libiruvc.h",
+      "bytes": 6795,
+      "sha256": "989906b554aa552f2c158b234863b2e098f6f7378e7f4671af5635fca48ae277"
+    },
+    {
+      "path": "rv1126_test/include/mjpeg_decoder.h",
+      "bytes": 217,
+      "sha256": "4ea8b54f8948d944598f798a860fd002a9442b7e549a6ee36cef4657d08fb920"
+    },
+    {
+      "path": "rv1126_test/include/mjpeg_huffman_tables.h",
+      "bytes": 4763,
+      "sha256": "225e066ea66474dc8a1bd9fad4d54d31879454420758c278431dd98c94835aba"
+    },
+    {
+      "path": "rv1126_test/include/perf_clock.h",
+      "bytes": 289,
+      "sha256": "ddfba3160d53e9bd04d513633f9b1d6d09bfa3783c9275699fddd390a6e64fb6"
+    },
+    {
+      "path": "rv1126_test/include/postprocess.h",
+      "bytes": 913,
+      "sha256": "2055772a981c1692cf189232dc1614f91530490142f2ab2799fca7ff1f222af7"
+    },
+    {
+      "path": "rv1126_test/include/rknn_api.h",
+      "bytes": 30381,
+      "sha256": "61eedea2dd0fed8e4ee667fef571bf6b07fc87495bb6282d65055f60c61e7079"
+    },
+    {
+      "path": "rv1126_test/include/visible_camera.h",
+      "bytes": 2041,
+      "sha256": "7a8b72e764d4fac3848c3d3141ffcfe8348ba753004af2e87bf68f62f6635a5f"
+    },
+    {
+      "path": "rv1126_test/include/yolov8.h",
+      "bytes": 1439,
+      "sha256": "acd2694bf63720ec91bb8444c5b3655b32abae33ebfdc8d8e5b4a9ae9752e6b4"
+    },
+    {
+      "path": "rv1126_test/lib/file_utils.cpp",
+      "bytes": 2779,
+      "sha256": "5db83ccf9b175cd1cf544f3ee00010fe0bdf0a73f31000be51cf0fb66dd44cd2"
+    },
+    {
+      "path": "rv1126_test/lib/ir_camera.cpp",
+      "bytes": 9408,
+      "sha256": "2bef8d4e7c63a7b6841372c70955ea5243b042514bd761e9dd1a31a9bdf70638"
+    },
+    {
+      "path": "rv1126_test/lib/mjpeg_decoder.cpp",
+      "bytes": 2506,
+      "sha256": "6a89499a05001cd00faff51cf91a06c45aaedd8a158dbd08279c941a9060e276"
+    },
+    {
+      "path": "rv1126_test/lib/visible_camera.cpp",
+      "bytes": 17895,
+      "sha256": "9cf304915e9b5ca71a38713c77e29acffab20d4a25c595d0bfd52620a7c015e7"
+    },
+    {
+      "path": "rv1126_test/lib/yolov8.cpp",
+      "bytes": 10399,
+      "sha256": "32d264adc2302d167b4faff0bbbdfc5247cc1d5525200167be915b65ad695046"
+    },
+    {
+      "path": "rv1126_test/lib/yolov8_postprocess.cpp",
+      "bytes": 21111,
+      "sha256": "3ee8e038157306037cb3f5e5d700ba2cc715331abad4941dbe588763af50b1ff"
+    },
+    {
+      "path": "rv1126_test/libs/arm64/libusb-1.0.so.0",
+      "bytes": 145392,
+      "sha256": "724a2e4b1b1b47e8df2cae0e937d9635b8a65a604cfa891e630463f377a9c16c"
+    },
+    {
+      "path": "rv1126_test/main.cpp",
+      "bytes": 16593,
+      "sha256": "b5df8308c062453a767f102b1177451d0fa62054b54172b00df5920eed6885ac"
+    },
+    {
+      "path": "rv1126_test/run.sh",
+      "bytes": 3603,
+      "sha256": "d3463d2c93bb3ded10a04e3d1e9b0fafc77dd972c6b86afb725624f1f80ae524"
+    },
+    {
+      "path": "rv1126_test/实现思路.md",
+      "bytes": 37753,
+      "sha256": "a6a876c405ea1240c3914ada1ec0954c5dbe029c6b1db7fcce796be250b459bd"
+    },
+    {
+      "path": "rv1126_test/项目总结.md",
+      "bytes": 17281,
+      "sha256": "50ad3d6ec8101fa934ac02df9dc910b55efaa52ac35149396e66f7f00c415370"
+    },
+    {
+      "path": "scripts/clean_cache.py",
+      "bytes": 812,
+      "sha256": "f2d356f87386167341694132a251dc9517f5e2a1a9197054b2fe4baf768e85de"
+    },
+    {
+      "path": "scripts/doctor.py",
+      "bytes": 4505,
+      "sha256": "fd590ee23a0e0afe2ec9a00a2904776e397b6b80d1b732b3731e2fd1a85f834d"
+    },
+    {
+      "path": "scripts/package_course_kit.py",
+      "bytes": 9254,
+      "sha256": "e133b83b6be99505cb3d6c7946f2550569732507ff7c20e7a3eb747d8bae2637"
+    },
+    {
+      "path": "scripts/sanitize.py",
+      "bytes": 3219,
+      "sha256": "7346783b04da9b7730ed4e04da5c131e88f7f5e3293b48ada1266e2727d2f0c3"
+    },
+    {
+      "path": "scripts/verify_package.py",
+      "bytes": 4364,
+      "sha256": "054720fadaa53dd553dd827243e5417f8832e7270db357db4e0ef5c189e4d85e"
+    },
+    {
+      "path": "twocameraOnMAC/.gitignore",
+      "bytes": 110,
+      "sha256": "bf7be57b24650107bd357c343c0131fadf5211c160bc584f14526386dfe07f04"
+    },
+    {
+      "path": "twocameraOnMAC/CMakeLists.txt",
+      "bytes": 9622,
+      "sha256": "803eb3fd60e580ef32e3771eaa0b628ecf8db4f04186d07389b77a2202be7fa9"
+    },
+    {
+      "path": "twocameraOnMAC/Makefile",
+      "bytes": 1177,
+      "sha256": "e600ce9bf94efdb1955478e4840c442429f2765829f396a3ee73e903ea27c5e1"
+    },
+    {
+      "path": "twocameraOnMAC/README.md",
+      "bytes": 3412,
+      "sha256": "e0a4dad648e114fad8e1db1e5866d7f0ddab30288cbb241ed3d1d59ebf9947fc"
+    },
+    {
+      "path": "twocameraOnMAC/calibration.txt",
+      "bytes": 488,
+      "sha256": "ee86ad13551f9083c90eb9068e885e8cf861aa278543659e14ac65a15d918715"
+    },
+    {
+      "path": "twocameraOnMAC/camerayolo.md",
+      "bytes": 95017,
+      "sha256": "b06aa1b551b49b6801bf9dc6b394a5232c63daa8501bdcf1c62bfaa76ef611f3"
+    },
+    {
+      "path": "twocameraOnMAC/include/all_config.h",
+      "bytes": 3893,
+      "sha256": "eab2f4427ff6aa75dc66f4f13b11c9c844843abb4662f4e963c0f80a47e41ed6"
+    },
+    {
+      "path": "twocameraOnMAC/include/falcon_cmd.h",
+      "bytes": 40184,
+      "sha256": "cecb951c338a1e06554eaf6cfc0e2e7b63e87638ee7fd4c7bf5357b7568d5735"
+    },
+    {
+      "path": "twocameraOnMAC/include/libirparse.h",
+      "bytes": 5967,
+      "sha256": "d59bedda307b406f60207f1d2719034d9924085378adc7b611ed64d6af2fc412"
+    },
+    {
+      "path": "twocameraOnMAC/include/libirprocess.h",
+      "bytes": 11168,
+      "sha256": "c5d18309994738477bd1a87c713c36ab99f15f24fb7ed78b89c85020b53948c6"
+    },
+    {
+      "path": "twocameraOnMAC/include/libirtemp.h",
+      "bytes": 32699,
+      "sha256": "adebb527bb3739b8f990f8b3f3389b20df96a7159d9179564e6f67ea2e7e7ea4"
+    },
+    {
+      "path": "twocameraOnMAC/include/libiruvc.h",
+      "bytes": 6795,
+      "sha256": "989906b554aa552f2c158b234863b2e098f6f7378e7f4671af5635fca48ae277"
+    },
+    {
+      "path": "twocameraOnMAC/libs/jpeg-arm/include/jconfig.h",
+      "bytes": 1713,
+      "sha256": "dfb75def374f51610d314b27ec2d894da437b5358b600d84749966cdaa8a1f31"
+    },
+    {
+      "path": "twocameraOnMAC/libs/jpeg-arm/include/jerror.h",
+      "bytes": 14884,
+      "sha256": "ec82aced6ae77feaa2feaf6bc197d51a49f20a7b6d5e32bffaa215046363afca"
+    },
+    {
+      "path": "twocameraOnMAC/libs/jpeg-arm/include/jmorecfg.h",
+      "bytes": 15371,
+      "sha256": "295042cc18628158d7fcaa3eda25f955735b3f435c1a8a2302d521d815b2398e"
+    },
+    {
+      "path": "twocameraOnMAC/libs/jpeg-arm/include/jpeglib.h",
+      "bytes": 50461,
+      "sha256": "7dfff1e1f499f1d2a72dacb691e6c405c49d3bceec17703b8fc68c802df7ba7e"
+    },
+    {
+      "path": "twocameraOnMAC/libs/native/libusb-1.0.so.0",
+      "bytes": 150400,
+      "sha256": "b18c387e1281fa4bc0b70a823c777a3ceb59e4f7fab61dc38ac8d88d5aeb6a36"
+    },
+    {
+      "path": "twocameraOnMAC/libs/native/libusb-1.0.so.0.2.0",
+      "bytes": 150400,
+      "sha256": "b18c387e1281fa4bc0b70a823c777a3ceb59e4f7fab61dc38ac8d88d5aeb6a36"
+    },
+    {
+      "path": "twocameraOnMAC/libs_version.txt",
+      "bytes": 106,
+      "sha256": "efc04f1c92659a04a5c0e2ae7e589d273b9438b5de28418915bc54e5c755f506"
+    },
+    {
+      "path": "twocameraOnMAC/models/yolov8n/export_onnx.py",
+      "bytes": 7215,
+      "sha256": "5737fab8f4aa1aaa1e374fe7a5ee90748ea799b9426aa4e2c5d45089a873f9df"
+    },
+    {
+      "path": "twocameraOnMAC/models/yolov8n/verify_onnx.py",
+      "bytes": 3639,
+      "sha256": "734099a8a68e689474835765f48069e83fd7ad1eb7a1bf771cb20025e68e232c"
+    },
+    {
+      "path": "twocameraOnMAC/src/alert_notifier.cpp",
+      "bytes": 9000,
+      "sha256": "f3bea5d3eb8ee4c6f58c769549de29345b63ebdcbd460467a9cb411a0edd50f9"
+    },
+    {
+      "path": "twocameraOnMAC/src/alert_notifier.h",
+      "bytes": 1302,
+      "sha256": "9ca54d4f4233880ed2436d660d9b7d5bf6e75e5013f90ffb8c01383d34c1503f"
+    },
+    {
+      "path": "twocameraOnMAC/src/cmd.cpp",
+      "bytes": 21126,
+      "sha256": "f728e452f711a2e65be493ec0683845ba5120a638f8e6978001fdbdb2fc09ae8"
+    },
+    {
+      "path": "twocameraOnMAC/src/cmd.h",
+      "bytes": 350,
+      "sha256": "46fcfa00e3de36b26e804c00af2a5915ed936a93ec4bf021250e338ea75714ee"
+    },
+    {
+      "path": "twocameraOnMAC/src/detector.h",
+      "bytes": 560,
+      "sha256": "002b2f1b948b00f84721ea8e7a9d1f55c507540e568707b47e4cc362e3544be0"
+    },
+    {
+      "path": "twocameraOnMAC/src/detector_onnx.cpp",
+      "bytes": 5643,
+      "sha256": "631e639debc061a09c4009c153d2834c423316c45c406ecb35b412317d3f51bb"
+    },
+    {
+      "path": "twocameraOnMAC/src/detector_onnx.h",
+      "bytes": 840,
+      "sha256": "1e368b151a7c581fd5900f9258bc6518727e26d9107a6e578b31d0b551f9b509"
+    },
+    {
+      "path": "twocameraOnMAC/src/detector_yolov8.cpp",
+      "bytes": 13754,
+      "sha256": "2c1809033680e2dffe223fcc5500b643ad575d01aabb72b8a981bcd2ec88b699"
+    },
+    {
+      "path": "twocameraOnMAC/src/detector_yolov8.h",
+      "bytes": 1662,
+      "sha256": "e9f62cb24ab633839ec374b7a8128ffd7e387a80878c8cceb44a8cb8dd12ead0"
+    },
+    {
+      "path": "twocameraOnMAC/src/display.h",
+      "bytes": 554,
+      "sha256": "8f4ab9fee3507a9cd85f22b1d7b27c2a882df1abe96ea90b8031ecc115b7f7f4"
+    },
+    {
+      "path": "twocameraOnMAC/src/display_fbdev.cpp",
+      "bytes": 11581,
+      "sha256": "0c659961527f50a86b9ddc5b17b84ffed68dcbd0f661f53cc0bac652a0ebfeb3"
+    },
+    {
+      "path": "twocameraOnMAC/src/display_opencv.cpp",
+      "bytes": 1940,
+      "sha256": "baff68a4dcbcf18a98633cdd1de12556afaae265ff27015cabeb1ad54f4228e6"
+    },
+    {
+      "path": "twocameraOnMAC/src/frame.h",
+      "bytes": 1430,
+      "sha256": "4d2aaa86f7e03af97ec2b96335177c56866be2f9eab3dc1a7da040af437e9f2d"
+    },
+    {
+      "path": "twocameraOnMAC/src/frame_compositor.cpp",
+      "bytes": 6873,
+      "sha256": "125f44833d11ae1e571584dee6caf84f35e7d5235f155e4fa4820ba44092a06a"
+    },
+    {
+      "path": "twocameraOnMAC/src/frame_compositor.h",
+      "bytes": 1302,
+      "sha256": "a84cd61dcba2a5c07d150962dadcf047e4161405d87ac29ceeb838c5440300cb"
+    },
+    {
+      "path": "twocameraOnMAC/src/hungarian.h",
+      "bytes": 3862,
+      "sha256": "c2a850afe0e662e1b7e6727e3f87b69e35b9e01cae3516ae493125aa27be337d"
+    },
+    {
+      "path": "twocameraOnMAC/src/image_registrator.cpp",
+      "bytes": 7627,
+      "sha256": "332996d9b60b7b1d1f39362f482cc3d49a271916a9a971f39a651a1113e6f32c"
+    },
+    {
+      "path": "twocameraOnMAC/src/image_registrator.h",
+      "bytes": 1848,
+      "sha256": "522dcbd46ec655f044c178653e7624eab02e98f6370b5def52a7e572c8c5a4ed"
+    },
+    {
+      "path": "twocameraOnMAC/src/image_resize.cpp",
+      "bytes": 4093,
+      "sha256": "dbcef2845ba7504deed3b106ba15d43667746cdb172044a0013af6ae1a2e3155"
+    },
+    {
+      "path": "twocameraOnMAC/src/image_resize.h",
+      "bytes": 663,
+      "sha256": "647e8f17d49f656efa399e66790d43c2675501be2e955c870302c20aa7c44ae9"
+    },
+    {
+      "path": "twocameraOnMAC/src/ir_camera.cpp",
+      "bytes": 22718,
+      "sha256": "c87e3b59761d0e89b7a1caff70271ae4e8054bbb9175853d780d3c57ac59ec6f"
+    },
+    {
+      "path": "twocameraOnMAC/src/ir_camera.h",
+      "bytes": 3687,
+      "sha256": "6f2f18360a65cb1b972140f3f54927b9afbaae452e648d0bdba2fe73f8a61244"
+    },
+    {
+      "path": "twocameraOnMAC/src/kalman_filter.cpp",
+      "bytes": 5509,
+      "sha256": "19bf388beaa4095a7d059d56089c33c13330f6e0954a88fc3239c7b2c666af64"
+    },
+    {
+      "path": "twocameraOnMAC/src/kalman_filter.h",
+      "bytes": 888,
+      "sha256": "341d681199de464269ba401972fe595ec806884ed1f59467974d66c33c0b0d1a"
+    },
+    {
+      "path": "twocameraOnMAC/src/mjpeg_decoder.cpp",
+      "bytes": 2506,
+      "sha256": "6a89499a05001cd00faff51cf91a06c45aaedd8a158dbd08279c941a9060e276"
+    },
+    {
+      "path": "twocameraOnMAC/src/mjpeg_decoder.h",
+      "bytes": 217,
+      "sha256": "4ea8b54f8948d944598f798a860fd002a9442b7e549a6ee36cef4657d08fb920"
+    },
+    {
+      "path": "twocameraOnMAC/src/mjpeg_huffman_tables.h",
+      "bytes": 4763,
+      "sha256": "225e066ea66474dc8a1bd9fad4d54d31879454420758c278431dd98c94835aba"
+    },
+    {
+      "path": "twocameraOnMAC/src/pseudo_color.cpp",
+      "bytes": 5660,
+      "sha256": "10d0d74e40ccffbe4dbf3da841b8ee45005e96cc58f0fa863e7d78b7c46a2872"
+    },
+    {
+      "path": "twocameraOnMAC/src/pseudo_color.h",
+      "bytes": 1875,
+      "sha256": "ed67c76e72a16d89aef1ea49ba1b165b1d895d156753238f8e8f1b1c9616997e"
+    },
+    {
+      "path": "twocameraOnMAC/src/sample.cpp",
+      "bytes": 32741,
+      "sha256": "80f22f75eb0d15a05f32297364fd5ec984e96cef774ef3976e61ec1409dc7d91"
+    },
+    {
+      "path": "twocameraOnMAC/src/sample_config.h",
+      "bytes": 5124,
+      "sha256": "0fbdaf2b80d64472941c8f4081bb1da79969d5320fe2bc942b7f4134e83605ea"
+    },
+    {
+      "path": "twocameraOnMAC/src/side_by_side_compositor.cpp",
+      "bytes": 3281,
+      "sha256": "e82a85b39c1a9507794be7bf30c45956265b5e527ec1f4749f8b0e88ea2e555a"
+    },
+    {
+      "path": "twocameraOnMAC/src/side_by_side_compositor.h",
+      "bytes": 1513,
+      "sha256": "e0c62cc9062a2f2fc23fe614e9228c5cbbd90e10433d0bd1ae7f17a3ccb6d694"
+    },
+    {
+      "path": "twocameraOnMAC/src/synchronizer.cpp",
+      "bytes": 748,
+      "sha256": "0d1cb0a0f8cbf594132d0cdbd5128a653e192b1d3408251aa6915faebcadfb91"
+    },
+    {
+      "path": "twocameraOnMAC/src/synchronizer.h",
+      "bytes": 412,
+      "sha256": "93c0772c98de24f734d22f63109cd533746a2cf1e9e89d426e618176cf4e6d0d"
+    },
+    {
+      "path": "twocameraOnMAC/src/temperature.cpp",
+      "bytes": 10537,
+      "sha256": "0b2e9029699acc78f96d874797bf6dbb1153e8c8001338bfdd2589b0fa136cc3"
+    },
+    {
+      "path": "twocameraOnMAC/src/temperature.h",
+      "bytes": 2005,
+      "sha256": "b229a2a94a484eb87a483eb5c3be356f3030819ffa8f6cb7cca5496f267fa4d1"
+    },
+    {
+      "path": "twocameraOnMAC/src/tracker.h",
+      "bytes": 2528,
+      "sha256": "c1652cd81283bbf9433559a4efbb5b29e76dffede8162812ae8098746c831215"
+    },
+    {
+      "path": "twocameraOnMAC/src/tracker_bytetrack.cpp",
+      "bytes": 11682,
+      "sha256": "c026d253a908f5765c902537f776899baddf9203a64bf6b114ed99522ad314d2"
+    },
+    {
+      "path": "twocameraOnMAC/src/tracker_bytetrack.h",
+      "bytes": 2191,
+      "sha256": "2244454c1322dbd630835940f8c023b92cab45500ac39153130b9c28bc521412"
+    },
+    {
+      "path": "twocameraOnMAC/src/tracking_overlay.cpp",
+      "bytes": 13656,
+      "sha256": "959bd7ddddfc4aecb53921ed52b438395425a40a7ed0ef8701075fe653a252a1"
+    },
+    {
+      "path": "twocameraOnMAC/src/tracking_overlay.h",
+      "bytes": 2540,
+      "sha256": "d03ffa98406df432e08e23e44c65bea674f1ba63a16fdf914ab9a982ae530bf8"
+    },
+    {
+      "path": "twocameraOnMAC/src/visible_camera.cpp",
+      "bytes": 19386,
+      "sha256": "008586dd14b32bdd8f92abcb1ee5448cf0761ed1f6b53e7152445ae39787f7d8"
+    },
+    {
+      "path": "twocameraOnMAC/src/visible_camera.h",
+      "bytes": 2215,
+      "sha256": "6fb43bc01d6d9d873901c7d8e8c900b5d4768d25edd9b2576b7d4daf0d778f28"
+    },
+    {
+      "path": "twocameraOnMAC/src/yolo_postprocess.cpp",
+      "bytes": 7310,
+      "sha256": "b5d108b787d093ca258fa351226f3245456fbe9ec94588353e359809fa3c546f"
+    },
+    {
+      "path": "twocameraOnMAC/src/yolo_postprocess.h",
+      "bytes": 1257,
+      "sha256": "91aa82eaf2e289388a53127adb9eea4a9df08714838ac18e98a0259620e63e61"
+    },
+    {
+      "path": "twocameraOnMAC/test/camera_capture_test/CMakeLists.txt",
+      "bytes": 3576,
+      "sha256": "ec8f237987dc6f2b856fd12a356511fc4cb402187ab78c928d336f04d3454194"
+    },
+    {
+      "path": "twocameraOnMAC/test/camera_capture_test/build.sh",
+      "bytes": 847,
+      "sha256": "b471c0fa5e57d8671dc0e8cad0e7fa2e74da5abc3dc77c01e4296a5af9840511"
+    },
+    {
+      "path": "twocameraOnMAC/test/camera_capture_test/calib_points.py",
+      "bytes": 6855,
+      "sha256": "923dd81a2c7e2de4a1812758be21b9cae9165bffd7a6ec0f93802951e298aa03"
+    },
+    {
+      "path": "twocameraOnMAC/test/camera_capture_test/calib_web.py",
+      "bytes": 28257,
+      "sha256": "10497575a75b92f96a34303836e4244217c357f559081f8febef76e7c3c85f94"
+    },
+    {
+      "path": "twocameraOnMAC/test/camera_capture_test/main.cpp",
+      "bytes": 7433,
+      "sha256": "c49420e63c85ba64945a3c608c93f63194a674610627c11708e67b7aa1fb4630"
+    },
+    {
+      "path": "twocameraOnMAC/test/detector_test/CMakeLists.txt",
+      "bytes": 1995,
+      "sha256": "518f41cb5608ca7651a53d229c8db79bd18cb0b133b6a38d6ad949950aada24f"
+    },
+    {
+      "path": "twocameraOnMAC/test/detector_test/build.sh",
+      "bytes": 559,
+      "sha256": "badaef00ec503e066d77df0e954631b98cc40aeca9c8af218e6b70f7ea77157a"
+    },
+    {
+      "path": "twocameraOnMAC/test/detector_test/main.cpp",
+      "bytes": 7586,
+      "sha256": "9c4698c67a4fea522f4ef4fc9a944e22a073751655850353354dbda86844838c"
+    },
+    {
+      "path": "twocameraOnMAC/test/ir_temperature_test/CMakeLists.txt",
+      "bytes": 5747,
+      "sha256": "41e6c62541d8dabee9d44277112866bf95db7ffc2e94f5370e456cdd787df8e9"
+    },
+    {
+      "path": "twocameraOnMAC/test/ir_temperature_test/build.sh",
+      "bytes": 1227,
+      "sha256": "27a330db6fb514a753ed9ecda7bf248aa2448dba062b5fc863befd1784f3936c"
+    },
+    {
+      "path": "twocameraOnMAC/test/ir_temperature_test/main.cpp",
+      "bytes": 8119,
+      "sha256": "198cf55c962d7bcc833da8611c7569ac1b3e133243b9e585ca2949110abc60d3"
+    },
+    {
+      "path": "twocameraOnMAC/udev/70-twocamera.rules",
+      "bytes": 140,
+      "sha256": "3c06603ba0b5de58ba03c18d7615375d96ff3b588fddf5042372a0c234da1d2d"
+    },
+    {
+      "path": "twocameraOnMAC/双摄重新配准工作总结.md",
+      "bytes": 9367,
+      "sha256": "005b6825e18765b88ae80326bf78648a9e7b17fe96488d9067e097b8b5757fd8"
+    },
+    {
+      "path": "twocameraOnMAC/项目总结.md",
+      "bytes": 17347,
+      "sha256": "e741b6f1f558e166b7ce7320e7dfea577f3c56a913d1a2edd5f5a0be0d7cbecd"
+    },
+    {
+      "path": "yolov8_detect_C_demo/CMakeLists.txt",
+      "bytes": 1412,
+      "sha256": "0add11509be634be7d82db2fd7de4aba1f0533929ffd35c9fff0c1c07f5e7487"
+    },
+    {
+      "path": "yolov8_detect_C_demo/build.sh",
+      "bytes": 122,
+      "sha256": "41172ee4d6c8347490317a3cd14d96e526a2331e6e2d73e34abb3bb28e559b0b"
+    },
+    {
+      "path": "yolov8_detect_C_demo/include/file_utils.h",
+      "bytes": 1089,
+      "sha256": "3cee0b6094f0d0fab21c65d26b406c0a1e636dd465daf1d90b934ba85545482b"
+    },
+    {
+      "path": "yolov8_detect_C_demo/include/postprocess.h",
+      "bytes": 913,
+      "sha256": "2055772a981c1692cf189232dc1614f91530490142f2ab2799fca7ff1f222af7"
+    },
+    {
+      "path": "yolov8_detect_C_demo/include/rknn_api.h",
+      "bytes": 30381,
+      "sha256": "61eedea2dd0fed8e4ee667fef571bf6b07fc87495bb6282d65055f60c61e7079"
+    },
+    {
+      "path": "yolov8_detect_C_demo/include/rknn_matmul_api.h",
+      "bytes": 8175,
+      "sha256": "d742155ae1938aece509fab589d7e32d2cd5c49eb602b6375aa87647ac8ea6f4"
+    },
+    {
+      "path": "yolov8_detect_C_demo/include/yolov8.h",
+      "bytes": 1301,
+      "sha256": "8382b162b17a351750a1cd24f5636641905d6c88eb9cdef72caa163a7de2d5c5"
+    },
+    {
+      "path": "yolov8_detect_C_demo/lib/file_utils.cpp",
+      "bytes": 2779,
+      "sha256": "5db83ccf9b175cd1cf544f3ee00010fe0bdf0a73f31000be51cf0fb66dd44cd2"
+    },
+    {
+      "path": "yolov8_detect_C_demo/lib/yolov8.cpp",
+      "bytes": 10469,
+      "sha256": "9b20027c1ee562d544a78f4e4049857c205bfb53e37423290627d1e016455698"
+    },
+    {
+      "path": "yolov8_detect_C_demo/lib/yolov8_postprocess.cpp",
+      "bytes": 21111,
+      "sha256": "3ee8e038157306037cb3f5e5d700ba2cc715331abad4941dbe588763af50b1ff"
+    },
+    {
+      "path": "yolov8_detect_C_demo/yolov8_detect_C_demo.code-workspace",
+      "bytes": 137,
+      "sha256": "c5ecd3cd7e8ada812593055492e7f9077cd8815a97b06d1345b24c216b0b5547"
+    },
+    {
+      "path": "yolov8_detect_C_demo/yolov8_detect_demo.cpp",
+      "bytes": 4499,
+      "sha256": "5a3532c4cae256ece8303ab1ed5cf10b25ca238518b997afad02de9dad9fe8f8"
+    },
+    {
+      "path": "互联异构计算实验设置_V1.2.md",
+      "bytes": 26140,
+      "sha256": "3c5dcd28f8c486097b35b77bb9c5131995a43674dc923ff80e31b6219b8d8e13"
+    },
+    {
+      "path": "互联异构计算实验设置_V1.3.md",
+      "bytes": 11328,
+      "sha256": "2589f13078c819beef78a3e49c6604c0db94ac978a4dae2eadc3d4c41a4e3445"
+    },
+    {
+      "path": "性能评估测试平台方案/RK3588与RV1126B性能评估测试平台配置与实验规划_V1.0.docx",
+      "bytes": 59986,
+      "sha256": "8edbd3d52d748afa8abc2144b27f7ebbcd00443bc7514ecb5f4a163c90d2d742"
+    }
+  ],
+  "note": "归档实测数据来自原实验机；大二进制模型与过程日志有意排除，见 ARCHIVE_NOTICE.md"
+}

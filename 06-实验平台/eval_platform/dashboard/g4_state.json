@@ -1,0 +1,263 @@
+{
+  "generated_at": "2026-11-18 19:35:08 +0800",
+  "title": "互联异构计算 · G4 实时控制台",
+  "architecture": "Mac 仅显示/控制 · 昇腾盒子 = 中心 LLM · RK3588 / RV1126B = 端侧视觉",
+  "api_base": "http://192.168.77.10:8080",
+  "nodes": [
+    {
+      "id": "mac",
+      "name": "MacBook Air M1",
+      "ip": "192.168.77.1",
+      "role": "显示 / 控制",
+      "detail": "dashboard 与编排；不再承担任何 LLM 推理",
+      "spec": "16 GB / 68.25 GB/s（历史 LLM 节点，已退役）",
+      "check_port": null
+    },
+    {
+      "id": "ascend",
+      "name": "昇腾 QiZhi01-20T",
+      "ip": "192.168.77.10",
+      "role": "中心 LLM",
+      "detail": "llama.cpp · OpenAI 兼容 API :8080",
+      "spec": "310B1 / 20 TOPS INT8 / 10 TFLOPS FP16 / 24 GB / CANN 8.0.RC3",
+      "check_port": 8080
+    },
+    {
+      "id": "rk3588",
+      "name": "RK3588 LubanCat-5IO",
+      "ip": "192.168.77.21",
+      "role": "端侧视觉 / 事件复核",
+      "detail": "9100 G3 证据服务 + 8081 板端 dashboard；事件送昇腾 LLM 二次确认",
+      "spec": "6 TOPS NPU / 7.73 GiB / Debian 11",
+      "check_port": 9100
+    },
+    {
+      "id": "rv1126b",
+      "name": "RV1126B Nano-TB",
+      "ip": "192.168.77.22",
+      "role": "三摄采集 / 轻量视觉",
+      "detail": "可见光 YOLOv8m (RKNN) 端侧实时检测 ~7.5 fps（约 77 ms/帧）；热成像端侧检测由 ir_detect 服务承担（同一 RKNN 模型跨模态复用 + 传统 CV 热斑），NPU 推理约 110~130 ms、每 2 帧跑一次（≈2.5 Hz），热斑逐帧（≈5 Hz）；8082 视觉服务在线，MJPEG 已接入本页；热成像 0bda:5840 经 DVP→USB 转接板接入 USB 口 4-1.2（USB2.0），厂商 SDK 以 usbfs 直读",
+      "spec": "2 TOPS NPU / 1.9 GiB / Ubuntu 22.04 / eth0 静态",
+      "check_port": 8082
+    }
+  ],
+  "llm": {
+    "endpoint": "http://192.168.77.10:8080/v1/chat/completions",
+    "model": "qwen3:0.6b Q4 GGUF (499 MB, Mac 离线搬运)",
+    "runtime": "llama.cpp b12375 · 盒上源码编译",
+    "backend": "llama.cpp CPU(ARM NEON) on Ascend box — NPU 后端混合执行已穷举验证（RMSNorm/ROPE 回退、Q8_0 量化路径），fp16 与量化 matmul 内核在 CANN 8.0.RC3/310B1 均缺失或未实现，当前栈不可行（见 npu_attempt.md 第二轮）",
+    "bench_ok": 3,
+    "bench_total": 3,
+    "median_tok_s": 4.04,
+    "cases": [
+      {
+        "case": "high_conf_person",
+        "event_id": 1,
+        "ts_ms": 1791816540816,
+        "label": "person",
+        "score": 0.75,
+        "area_px": 1298,
+        "status": "ok",
+        "wall_s": 8.297,
+        "prompt_tokens": 145,
+        "completion_tokens": 2,
+        "decode_tok_per_s": 4.04,
+        "prompt_tok_per_s": 12.22,
+        "verdict": "confirm",
+        "finish_reason": "stop",
+        "llm_text": "confirm"
+      },
+      {
+        "case": "low_conf_car",
+        "event_id": 3,
+        "ts_ms": 1791816541082,
+        "label": "car",
+        "score": 0.34,
+        "area_px": 28,
+        "status": "ok",
+        "wall_s": 4.216,
+        "prompt_tokens": 143,
+        "completion_tokens": 2,
+        "decode_tok_per_s": 4.04,
+        "prompt_tok_per_s": 10.86,
+        "verdict": "confirm",
+        "finish_reason": "stop",
+        "llm_text": "confirm"
+      },
+      {
+        "case": "tiny_noise",
+        "event_id": 2,
+        "ts_ms": 1791816540989,
+        "label": "none",
+        "score": 0.0,
+        "area_px": 10,
+        "status": "ok",
+        "wall_s": 4.071,
+        "prompt_tokens": 142,
+        "completion_tokens": 2,
+        "decode_tok_per_s": 3.68,
+        "prompt_tok_per_s": 11.08,
+        "verdict": "reject",
+        "finish_reason": "stop",
+        "llm_text": "reject"
+      }
+    ]
+  },
+  "keyframes": [
+    {
+      "kf": "KF-01",
+      "time": "2026-10-12 22:49:14.888 +0800",
+      "event_id": 2102,
+      "label": "none",
+      "score": 0.0,
+      "area": 11,
+      "dt": 0.25,
+      "persist": 0.0,
+      "vis": "det_20261012_224914_889_vis.jpg",
+      "ir": "det_20261012_224914_889_ir.jpg",
+      "verdict": "reject",
+      "reason": "规则一致",
+      "need_review": null,
+      "llm_status": "ok",
+      "wall_s": 3.554
+    },
+    {
+      "kf": "KF-02",
+      "time": "2026-10-12 22:49:15.966 +0800",
+      "event_id": 2352,
+      "label": "person",
+      "score": 0.76,
+      "area": 1393,
+      "dt": 8.62,
+      "persist": 15.15,
+      "vis": "det_20261012_224915_968_vis.jpg",
+      "ir": "det_20261012_224915_968_ir.jpg",
+      "verdict": "confirm",
+      "reason": "规则一致",
+      "need_review": null,
+      "llm_status": "ok",
+      "wall_s": 4.495
+    },
+    {
+      "kf": "KF-03",
+      "time": "2026-10-12 22:49:16.063 +0800",
+      "event_id": 2353,
+      "label": "car",
+      "score": 0.61,
+      "area": 127,
+      "dt": 1.56,
+      "persist": 15.15,
+      "vis": "det_20261012_224916_064_vis.jpg",
+      "ir": "det_20261012_224916_064_ir.jpg",
+      "verdict": "confirm",
+      "reason": "规则一致",
+      "need_review": null,
+      "llm_status": "ok",
+      "wall_s": 4.714
+    },
+    {
+      "kf": "KF-04",
+      "time": "2026-10-12 22:49:16.157 +0800",
+      "event_id": 2354,
+      "label": "none",
+      "score": 0.0,
+      "area": 13,
+      "dt": 3.5,
+      "persist": 15.15,
+      "vis": "det_20261012_224916_158_vis.jpg",
+      "ir": "det_20261012_224916_158_ir.jpg",
+      "verdict": "confirm",
+      "reason": "规则一致",
+      "need_review": null,
+      "llm_status": "ok",
+      "wall_s": 4.464
+    }
+  ],
+  "controls": [
+    {
+      "t": "启动实时控制台",
+      "c": "python3 eval_platform/dashboard/serve_g4.py --port 8899"
+    },
+    {
+      "t": "复检链路与节点",
+      "c": "bash eval_platform/tools/recheck_lab_link.sh"
+    },
+    {
+      "t": "昇腾 LLM 服务",
+      "c": "ssh ascend 'systemctl status g4-llm --no-pager'"
+    },
+    {
+      "t": "实测 LLM 吞吐",
+      "c": "python3 eval_platform/tools/bench_llm_ascend.py"
+    },
+    {
+      "t": "RV1126B 视觉服务",
+      "c": "ssh rv1126b 'systemctl status camera-preview --no-pager'"
+    },
+    {
+      "t": "RK3588 事件二次确认",
+      "c": "ssh rk3588 'python3 /home/cat/eval_dashboard/rk_llm_reconfirm.py'"
+    },
+    {
+      "t": "重建快照数据",
+      "c": "python3 eval_platform/dashboard/build_g4_dashboard.py"
+    },
+    {
+      "t": "重编端侧两个检测器",
+      "c": "bash eval_platform/tools/build_edge_detectors.sh"
+    },
+    {
+      "t": "切换可见光模型",
+      "c": "ssh rv1126b \"sed -i 's|^ExecStart=.*|ExecStart=/root/eval_dashboard/yolo_live /userdata/rv1126_test/<新模型>.rknn|' /etc/systemd/system/yolo-live.service && systemctl daemon-reload && systemctl restart yolo-live\""
+    },
+    {
+      "t": "切换热成像模型",
+      "c": "ssh rv1126b \"sed -i 's|^ExecStart=.*|ExecStart=/root/eval_dashboard/ir_detect /userdata/rv1126_test/<新模型>.rknn --yolo-every 2|' /etc/systemd/system/ir-detect.service && systemctl daemon-reload && systemctl restart ir-detect\""
+    },
+    {
+      "t": "节点分工实时名单",
+      "c": "curl -s http://127.0.0.1:8899/api/roster?refresh=1 | python3 -m json.tool"
+    },
+    {
+      "t": "带实时名单问 LLM",
+      "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"现在各节点在跑什么？\"}]}'"
+    },
+    {
+      "t": "近 1 分钟监测事件（原始事实）",
+      "c": "curl -s 'http://127.0.0.1:8899/api/events?seconds=60' | python3 -m json.tool"
+    },
+    {
+      "t": "问 LLM 近 1 分钟事件",
+      "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"近一分钟在本地系统中监测到哪些事件？\"}]}'"
+    },
+    {
+      "t": "问 LLM 双光研判（三行）",
+      "c": "curl -sN -X POST http://127.0.0.1:8899/api/llm/stream -H 'Content-Type: application/json' -d '{\"messages\":[{\"role\":\"user\",\"content\":\"近 1 分钟双光事件分析\"}]}'"
+    },
+    {
+      "t": "双光研判（chip 同一链路）",
+      "c": "curl -sN -X POST http://127.0.0.1:8899/api/analyze/stream -H 'Content-Type: application/json' -d '{\"seconds\":60}'"
+    }
+  ],
+  "honest_note": [
+    "关键帧图像沿用 2026-10-12 RV1126B 板端 dual_demo 归档实跑（archived），非本轮新采集。",
+    "热成像实时流按模组原始朝向输出（256×192，2026-11-18 起取消 90° 旋转）；归档关键帧 det_*_ir.jpg 仍是 2026-11-13 物理逆时针旋转 90° 的版本（192×256），两者方向不同，不可直接叠加比对。",
+    "RV1126B 于 2026-11-16 复测确认在线（EASY-EAI-NANO-TB，MAC 4e:0e:39:be:41:b3）：此前「离线」实为板端 eth0 走 DHCP 而网段无 DHCP 服务器、静态 .22 原配在 eth1(NET1)；现 eth0 已改静态并重启验证，RK3588 侧 g4-dhcp.service 兜底。可见光 10 fps 正常。热成像此前报「未枚举」有两个原因：模组 USB 连线脱落；且 TC1-C 自身无 USB 接口，须经 DVP→USB 转接板，厂商 SDK 以 usbfs 独占接口，uvcvideo 因此不创建 /dev/video 节点——按 video4linux 判断会误判为未插入。2026-11-18 重插后实测：0bda:5840 枚举在 RV1126B USB 口 4-1.2（480 Mbps / USB2.0），SDK 出图 4.5 fps（256×192 灰度），控制台连接信息已改为以 USB 层为准。",
+    "板端墙钟漂移：昇腾盒子落后约 15 个月，跨设备协同以单调钟 + RTT 建期限。",
+    "中心 LLM 实际跑在昇腾盒子的 ARM CPU（llama.cpp b12375 源码编译）；NPU 混合执行已完成穷举验证：权重可 offload、算子调度正常，但 fp16 matmul 缺 MatMulV2 NZ 内核、量化 matmul WeightQuantBatchMatmulV2 显式不支持 310B、RmsNorm/RoPE 算子缺失，属 llama.cpp CANN 后端架构级限制（官方仅验证 910B/910C/310P）。详见 npu_attempt.md 第二轮。",
+    "模型为 qwen3:0.6b Q4（499 MB，由 Mac Ollama blob 离线搬运）；0.6B 小模型语义判断能力有限，KF-03/KF-04 的 confirm 结论仅供参考，不作为测量口径。",
+    "GLIBC 2.35 的盒子无法运行官方 Ubuntu ARM64 预编译包（要求 2.38），故全部二进制在盒上源码编译。",
+    "本页实时数据来源：SSE /api/stream 每 2 s 推送节点探测、llama-server Prometheus 指标与 RV1126B status.json；视频为 RV1126B:8082 的 MJPEG 转发（约 8 fps 拉取）。所有 KPI 均为现场实测，缺值显示 -- 而非 0。",
+    "热成像检测（2026-11-18 新增，端侧 RV1126B）：此前热成像通道只有取流与灰度统计，没有任何检测算法——可见光的 YOLOv8 只吃可见光帧，厂商 dual_demo 也只是把可见光检测框按配准投影到热图上，并非对热图推理。现新增 ir_detect 服务（/root/eval_dashboard/ir_detect，源码 eval_platform/tools/ir_detect.cpp，systemd 单元 ir-detect.service）：① 复用同一份 yolov8m_rv1126b.rknn 在 NPU 上对热图推理（热图 256×192 放大到 640×480，同 4:3 无形变），属跨模态复用，分数普遍低于可见光，只能当「疑似」看；② 传统 CV 热斑检测（帧内中位数 + MAD 自适应阈值 + 连通域），逐帧跑，补上无纹理热源。全部数值是 0~255 相对灰度，不是摄氏温度。",
+    "NPU 是共享资源：可见光 yolo_live 与热成像 ir_detect 都在 RV1126B 的 2 TOPS NPU 上排队，单帧 640×640 推理约 77 ms（可见光）/110~130 ms（热成像，含 640×480 上采样与映射）。因此热成像网络推理降频到每 2 帧一次（实测 ~2.5 Hz），热斑仍 5 Hz；实测可见光仍 7.5 fps、热成像 5.0 fps，未出现掉帧堆积。另修正一处此前的口径错误：status.json 里的 ir_fps 旧值 6.5 是把同一帧重复推送算进去的虚高值，现在只统计真正更新过的帧（5.0），与 SDK 实际出图一致。",
+    "节点分工卡（2026-11-18 新增）：后端每 25 s 通过 SSH 在各节点执行 tools/node_roster.py，采集「关键进程 CPU / systemd 服务 / 模型文件」。其中「正在跑的模型」取运行时事实——RV1126B 由 yolo_live 与 ir_detect 自己上报文件名（换模型重启即变），昇腾取 llama.cpp /props 的 model_path；目录扫描只作补充。Mac 因 macOS 权限拿不到 ps，只能确认本服务进程（serve_g4.py）在跑，页面如实标注「其他进程不可枚举」。",
+    "LLM 对话默认把上面这份实时名单作为 system 上下文注入（请求里 ground=false 可关闭），所以问「现在各节点在跑什么」时答案跟随实际状态而非构建期快照；实测 0.6B 在 19 s 内给出四行节点/进程/模型回答，内容与后端名单一致。",
+    "「近 1 分钟监测事件」（2026-11-18 新增）：事件只记状态切换——目标进入/离开视野（连续 8 s 未检出才算离开、连续 2 个采样命中才算进入，避免 YOLO 抖动刷屏；分数 <0.40 的弱检测不发事件，只进「当前稳态」）、热成像热斑起落、可见光帧率跌到 2 fps 以下/恢复、热成像灰度均值跳变 ≥15、节点掉线/恢复、热成像就绪/不可用；「chair 一直在场」这类稳态不进事件流，而是作为一行「当前稳态」附在后面。事实由后端从 2 s 采样里提取（GET /api/events?seconds=60 可核对），LLM 只负责按时间复述，不产生任何原始数字。",
+    "两个问事件的问题口径不同（2026-11-18 拆开）：①「近一分钟在本地系统中监测到哪些事件」= 事件台账，只按时间复述状态切换条目，明确禁止给判断/建议/正常异常评价；②「近 1 分钟双光事件分析」= 双光研判，只给「判断 / 理由 / 建议」三行，禁止逐条复述事件。后端按关键词分流（研判优先于列举，否则「双光事件分析」会被「事件」二字抢走、退化成复述台账；带 confirm/reject 的事件复核请求不接地，直接透传）。两条入口共用同一份 analysis_prompt，避免同一个问题两个说法。页面也用不同角标区分：台账（teal，条目标注事件 N 条）与研判（blue，标注判断/理由/建议）。",
+    "研判的量化与边界（2026-11-18）：判断行的「正常/关注/异常」由后端机械判定——异常事件 >0 判异常；任一路就绪率 <90% 判关注；可见光稳定有目标（命中率 ≥80%）而热成像整窗未报出同名类判关注（跨模态复用权重漏检）；其余为正常。这一行 LLM 不许改写，返回前由后端强制替换成含两路分数的成品（实测 0.6B 会省掉括号或把「关注」写成「异常」）。理由与建议才由 0.6B 生成，全程不给它算数：分差（可见光最高分 − 热成像最高分）、两路命中率、热斑个数、异常条数都由后端从窗口采样里算出，作为气泡下方的「对比」条展示，悬停可看完整证据块。若三次重试仍吐模板占位「一句话」，则删掉该行并标注「本次模型未给出理由与建议」，绝不把占位当结论。"
+  ],
+  "source": {
+    "bench": "eval_platform/llm/llm_bench_ascend.json",
+    "keyframes": "/Users/Apple/WorkBuddy/异构计算软件工程_Software/eval_platform/runs/20261113T145438Z_G4_m1_ascend_heterogeneous/keyframes_ascend.json"
+  }
+}

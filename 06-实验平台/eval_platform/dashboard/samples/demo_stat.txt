@@ -1,0 +1,21 @@
+exit=124
+[EVT] id=16 quad=Q1 tmax=31.0 est=31.0 dT=+1.1K area=126px sal_diff=0.05 age=0.00s valid=1
+[EVT] id=19 quad=Q1 tmax=30.4 est=30.7 dT=+0.2K area=10px sal_diff=0.07 age=0.00s valid=1
+[EVT] id=21 quad=Q1 tmax=30.6 est=30.6 dT=+0.4K area=37px sal_diff=-0.04 age=0.00s valid=1
+[EVT] id=283 quad=Q1 tmax=30.4 est=30.4 dT=+0.2K area=39px sal_diff=0.03 age=0.00s valid=1
+[EVT] id=684 quad=Q1 tmax=31.5 est=31.5 dT=+8.4K area=1357px sal_diff=0.20 age=5.07s valid=1
+[EVT] id=685 quad=Q1 tmax=27.2 est=30.8 dT=+3.6K area=12px sal_diff=0.92 age=5.07s valid=1
+[EVT] id=686 quad=Q1 tmax=26.0 est=26.0 dT=+1.0K area=74px sal_diff=0.27 age=5.07s valid=1
+[EVT] id=687 quad=Q1 tmax=33.1 est=33.1 dT=+9.8K area=19727px sal_diff=0.01 age=5.07s valid=1
+[EVT] id=688 quad=Q1 tmax=31.9 est=31.9 dT=+5.4K area=872px sal_diff=-0.06 age=5.07s valid=1
+[EVT] id=689 quad=Q1 tmax=31.2 est=31.2 dT=+0.4K area=26px sal_diff=-0.12 age=5.07s valid=1
+[EVT] id=690 quad=Q1 tmax=31.7 est=31.7 dT=+0.3K area=79px sal_diff=-0.21 age=5.03s valid=1
+[EVT] id=691 quad=Q1 tmax=33.2 est=33.2 dT=+1.6K area=78px sal_diff=-0.08 age=5.07s valid=1
+[EVT] id=692 quad=Q1 tmax=25.7 est=25.9 dT=+0.6K area=17px sal_diff=0.04 age=5.04s valid=1
+[EVT] id=958 quad=Q1 tmax=24.9 est=24.9 dT=+0.4K area=41px sal_diff=-0.04 age=0.00s valid=1
+[EVT] id=1118 quad=Q1 tmax=23.3 est=23.4 dT=+0.2K area=14px sal_diff=0.03 age=0.00s valid=1
+[EVT] id=1437 quad=Q1 tmax=31.1 est=31.1 dT=+8.5K area=1374px sal_diff=0.21 age=10.11s valid=1
+[EVT] id=1438 quad=Q1 tmax=25.6 est=25.6 dT=+1.6K area=111px sal_diff=0.21 age=10.11s valid=1
+[EVT] id=1439 quad=Q1 tmax=26.7 est=30.2 dT=+3.8K area=13px sal_diff=0.93 age=10.11s valid=1
+[EVT] id=1441 quad=Q1 tmax=32.7 est=32.7 dT=+10.0K area=19838px sal_diff=0.00 age=10.11s valid=1
+[EVT] id=1442 quad=Q1 tmax=31.5 est=31.5 dT=+5.4K area=892px sal_diff=-0.06 age=10.11s valid=1

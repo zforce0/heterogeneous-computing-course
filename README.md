@@ -35,6 +35,15 @@
 
 ---
 
+## 🔓 在线解锁入口（推荐）
+
+**[打开解锁页面 `unlock.html`](unlock.html)** — 浏览器内输入密码，即可查看/下载全部核心材料（PPT / 手册 / 测评 / 教案）。密码仅在本地校验与解密，不上传任何服务器。
+
+> 本地打开：在仓库根目录运行 `python3 -m http.server 8000`，浏览器访问 `http://localhost:8000/unlock.html`。
+> 命令行等价：`KIT_PASSWORD='<授权密码>' python3 scripts/protect_core.py decrypt`。
+
+---
+
 ## 核心材料保护
 
 **明文 demo（打开即看）**：本 README、界面截图、3 个视频、课程规划、`03-教具包/`、`06-实验平台/`、`07-展示材料/`、`08-商务材料/`。

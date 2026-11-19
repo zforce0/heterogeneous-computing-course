@@ -1,6 +1,56 @@
 # 03 · 使用文档（实时控制台）
 
-打开 `http://127.0.0.1:8899/`（端口由 `DASH_PORT` 决定）。页面只负责显示与转发，**不做任何推理**。
+页面只负责显示与转发，**不做任何推理**。首次使用按 `3.0` 的四步启动后再看分区说明。
+
+## 3.0 快速开始：启动系统与打开控制台
+
+在**工程根目录**（含 `Makefile` 与 `eval_platform/` 的那一层）执行。核心服务只用 Python 标准库，无需安装第三方包；`make` 只是便捷封装，没有 `make` 时用括号里的等价命令。
+
+**① 前置检查（一次性）**
+
+```bash
+python3 --version                          # 需 >= 3.8
+make doctor                                # 只读自检：Python/文件/端口/远端可达性
+                                           # 等价：python3 scripts/doctor.py
+```
+
+`doctor` 在远端设备未上电时也会给出提示，不算失败。若换过网段，先 `cp config/lab.env.example config/lab.env` 再改里面的 IP/端口；不改则沿用原实验网默认值。
+
+**② 重建页面（可选，归档快照已随包提供）**
+
+```bash
+make page                                  # 从 g4_state.json 重建 g4_live.html，无需网络
+                                           # 等价：python3 eval_platform/dashboard/build_g4_dashboard.py
+```
+
+**③ 启动服务**
+
+```bash
+make run                                   # 前台运行，Ctrl-C 结束
+                                           # 等价：python3 eval_platform/dashboard/serve_g4.py --port 8899
+```
+
+脚本会先探测 RV1126B 视频服务；若板子未上电只会打印提示，不阻断启动。服务只绑定 `127.0.0.1`，不改本机网络配置。
+
+**④ 确认就绪并打开**
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8899/api/state   # 返回 200 即就绪
+```
+
+浏览器打开：**http://127.0.0.1:8899/**（等价 `/g4_live.html`）。端口由 `DASH_PORT` 或启动参数决定，默认 `8899`。
+
+> 打开后若双光画面、曲线、节点状态短暂显示 `--` / 不可用：SSE 采样每 2 s 推一次、节点名单 25 s 刷新一次，等 10~30 s 即会填满。远端节点离线时如实显示不可用，归档数据仍可查看——这不代表板子故障。
+
+**停服务 / 换端口**
+
+```bash
+# 前台运行时 Ctrl-C 即可；后台运行时按端口找 PID 再结束
+lsof -nP -iTCP:8899 -sTCP:LISTEN -t | xargs kill
+make run DASH_PORT=8900                    # 或 python3 ... --port 8900
+```
+
+**端口被占用**：先确认是不是上一次的服务还在（`curl .../api/state` 是否 200）；是则直接复用，否则换端口或结束占用进程。**页面白屏**：多半是服务没在跑或 SSE 长连接卡住，重启服务后刷新即可（`curl` 确认 200 再刷新）。
 
 ## 3.1 页面分区
 

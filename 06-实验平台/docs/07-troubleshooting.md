@@ -6,7 +6,8 @@
 
 | 症状 | 常见原因 | 处理 |
 |---|---|---|
-| RV1126B 灯亮但 ping 不通 | `eth0` 走 DHCP，而实验网没有 DHCP 服务器；静态 `.22` 误配在 `eth1` | 查板端 netplan；把静态地址配到插网线的口，`netplan apply` 后重启整机 |
+| RV1126B 灯亮但 ping 不通 | `eth0` 走 DHCP，而实验网没有 DHCP 服务器；静态 `.22` 误配在 `eth1`；或网线插错口 | 确认网线插 **NET0/eth0**（板载 GMAC）；双口适配见下，或跑 `setup_rv_dual_nic.sh` |
+| RV1126B 插 NET1 也要能用 | NET1 是 USB 网卡（eth1，MAC `a6:52:d5:68:39:f1`），与 eth0 MAC 不同 | 双口适配：eth0 静态 `.22`、eth1 走 DHCP 由 RK3588 按 MAC 固定分配 `.22`（见 7.2） |
 | `.22` 全部丢包，ARP 指向 RK3588 的 MAC | 遗留 `rk-forward.service` 的 proxy ARP 劫持 | 在 RK 上停 `rk-forward.service`、两口 `proxy_arp=0`、`ip_forward=0`、删 `.22` 主机路由；Mac 清 ARP 缓存 |
 | 升腾盒子三层不可见 | 出厂地址是 `192.168.137.100`，不是规划的 `.10`；无 DHCP/mDNS | 经同网段跳板发现，`persist_ascend_lab_ip.sh` 固化双地址，装公钥后复检 |
 | 扫描把打印机 `192.168.1.52:9100` 当 RK3588 | 9100 也是 RAW/JetDirect 打印端口 | 用 ICMP + 8081 标题 + 9100 ping/pong 三重证据，不要只看单端口 |
@@ -19,6 +20,32 @@ bash eval_platform/tools/recheck_lab_link.sh
 bash eval_platform/tools/discover_lab_devices.py
 python3 eval_platform/tools/discover_topology.py --json
 ```
+
+### RV1126B 双网口适配（NET0 / NET1 都能用）
+
+RV1126B（EASY-EAI-NANO-TB）有两个实验网口，MAC 不同，不能都配静态 `.22`（会冲突）。现行方案：
+
+| 口 | 系统设备 | MAC | 配置 | 插它时 |
+|---|---|---|---|---|
+| **NET0**（板载 GMAC） | `eth0` | `4e:0e:39:be:41:b3` | 静态 `192.168.77.22/24` | 直接用静态地址 |
+| **NET1**（USB 网卡） | `eth1` | `a6:52:d5:68:39:f1` | DHCP | 由 RK3588 按 MAC 固定分配 `.22` |
+
+任一时刻只插一根网线，`.22` 不冲突；视觉服务 `camera_stream.py` 监听 `0.0.0.0:8082`，与具体网口无关。
+
+一键适配（板端执行，幂等，自动备份 netplan）：
+
+```bash
+scp eval_platform/tools/setup_rv_dual_nic.sh rv1126b:/tmp/
+ssh rv1126b "sudo bash /tmp/setup_rv_dual_nic.sh"
+```
+
+**依赖**：RK3588 上 `g4-dhcp.service` 必须为 active，且 `/etc/g4-dhcp.conf` 含两 MAC 绑定同一 IP：
+
+```
+dhcp-host=4e:0e:39:be:41:b3,a6:52:d5:68:39:f1,192.168.77.22,infinite
+```
+
+若 dnsmasq 报 `duplicate dhcp-host IP address`，就是把两个 MAC 写成了两条独立 `dhcp-host`——必须合并成上面一条逗号分隔的形式。验证：换线后 Mac 侧 `ping -c2 192.168.77.22` 与 `curl http://192.168.77.22:8082/status.json` 都应通过。
 
 ## 7.2 热成像 / 双光
 

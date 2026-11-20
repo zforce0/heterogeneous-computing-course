@@ -15,6 +15,7 @@ V4L2 devices are exclusive. Use stop before running capture experiments.
 Thermal view is grayscale relative radiance; no pseudo-color, no calibrated Celsius.
 """
 import collections
+import hashlib
 import http.server
 import json
 import os
@@ -35,6 +36,9 @@ SDK_LIB = "/userdata/dual_demo/libs/arm64"
 IR_VID, IR_PID = "0bda", "5840"
 # 连续这么多帧全 0 就认为 SDK 没真取到数据（约 1.5 s，正常画面有噪声，不会全 0）
 IR_BLACK_LIMIT = 12
+# SDK 长时间运行后会「循环写同一帧」：mtime 照常增长、内容却一字不变，
+# 页面显示 5fps/streaming 但画面静止。连续这么多帧内容完全相同即判冻住并重建 SDK。
+IR_DUP_LIMIT = 20
 # yolo_live 的产物文件超过这么久没更新，就认为可见光断流（按时间算，不按轮数算）
 VIS_STALE_SEC = 1.6
 # 端侧热成像检测器（ir_detect）的产物：IR 只有 ~5 fps，2.5 s 没更新就当作它没在跑
@@ -290,6 +294,8 @@ def ir_grabber():
     """取 SDK 输出帧。模组缺席 / 进程退出 / SDK 空转都能自愈，无需重启服务。"""
     backoff = 1.0
     black_run = 0
+    dup_run = 0
+    last_raw_md5 = None
     last_restart = 0.0
     last_sig = None
     while True:
@@ -336,6 +342,28 @@ def ir_grabber():
                 time.sleep(0.12)
                 continue
             black_run = 0
+            # SDK 冻住检测：mtime 会变，但内容一字不变 → 画面静止却显示 streaming。
+            # 用原始帧内容的 md5 判定，连续 IR_DUP_LIMIT 帧相同就重建 SDK。
+            cur_md5 = hashlib.md5(raw).digest()
+            if cur_md5 == last_raw_md5:
+                dup_run += 1
+            else:
+                dup_run = 0
+                last_raw_md5 = cur_md5
+            if dup_run >= IR_DUP_LIMIT:
+                with lock:
+                    ctrl["ir_fps"] = 0.0
+                    ctrl["ir_state"] = "sdk_error"
+                    ctrl["ir_error"] = ("SDK 画面冻结（连续 %d 帧相同），已重建 SDK" % dup_run)
+                now = time.time()
+                if now - last_restart > 10:
+                    last_restart = now
+                    stop_sdk()
+                    ensure_sdk()               # 重启取帧进程，让热成像重新出帧
+                dup_run = 0
+                last_raw_md5 = None
+                time.sleep(2.0)                # 给 SDK 恢复时间，别立刻又读旧帧
+                continue
             payload = rgb_png(w, h, s, raw)
             now = time.monotonic()
             with lock:

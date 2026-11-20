@@ -49,6 +49,8 @@ dhcp-host=4e:0e:39:be:41:b3,a6:52:d5:68:39:f1,192.168.77.22,infinite
 
 ## 7.2 热成像 / 双光
 
+- **热成像画面卡住但 `ir_fps` 正常、状态 streaming**：厂商 SDK 长时间运行后会「循环写同一帧」——`/tmp/ir_sdk.raw` 的 mtime 照常增长，内容 MD5 却不变。`ir_grabber` 已加重复帧检测（连续 `IR_DUP_LIMIT=20` 帧相同即重建 SDK）；也可手动 `ssh rv1126b "sudo systemctl restart camera-preview"` 立即恢复（板端需已同步新版 `camera_stream.py`）。注意旧版只检测全黑帧，识别不了冻结帧。
+
 - **SDK 报 `IR camera 0bda:5840 was not found`**：先查物理连接。TC1-C 模组自身无 USB 口，须经 DVP→USB 转接板；厂商 SDK 以 usbfs 独占接口，因此 `uvcvideo` 不会创建 `/dev/video` 节点——按 video4linux 判断会误判为未插入。以 `lsusb` / USB 拓扑为准。
 - **`ir_fps` 虚高 6.5**：同帧被重复推送。现按 `st_mtim.tv_nsec + size` 判新帧，实测 5.0。
 - **检测钉在 1 Hz**：用了秒级 `st_mtime`。改纳秒戳后恢复 5 Hz。

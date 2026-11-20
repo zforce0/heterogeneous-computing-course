@@ -22,6 +22,24 @@
 | **B · 单机控制台** | 检查平台本身、演示 UI | 仅 Mac/Linux | 页面 + SSE 曲线 + 事件流；远端节点会显示 offline |
 | **C · 四节点全链路** | 完整实验 | 四节点 + 实验网 | 真实双光流、端侧检测、中心 LLM 问答 |
 
+### 一键启动（最省事）
+
+在**工程根目录**执行一条命令即可——自动清理旧进程、后台启动、健康检查、打开浏览器，并打印节点连通性诊断：
+
+```bash
+./start.sh                 # 重启控制台并打开浏览器（等价 make start）
+./start.sh --no-open       # 启动但不打开浏览器
+./start.sh --rebuild       # 先重建页面再启动
+./start.sh status          # 查看状态（PID + /api/state + 日志尾部）
+./start.sh stop            # 停止控制台
+./start.sh 8900            # 指定端口
+```
+
+`start.sh` 会输出形如 `✓ 控制台就绪: http://127.0.0.1:8899/`，并列出 RV1126B / 昇腾的在线离线状态。**节点离线只说明实验网没接，服务本身是正常的**——排障见文末。服务日志在 `/tmp/g4-dashboard-<端口>.log`。
+
+> 默认用 `nohup` 后台运行（关掉终端仍继续）。若在受限沙箱里服务随命令结束被回收，改用前台 `python3 eval_platform/dashboard/serve_g4.py --port 8899`。
+
+
 ### 环境要求
 
 - Python **3.8+**（核心平台只用标准库，实现 HTTP/SSE/MJPEG/SSH 编排，**无需 pip 安装**；可选 ML 工具见 `requirements-ml.txt`）
